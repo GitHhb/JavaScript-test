@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        #p1 {color: red;}
+    </style>
+</head>
+<body>
+    <p style="color: purple;" id="p1">Hallo allemaal</p>
+    <input type="button" value="Hiero" id="but1">
+    <script>
+        document.getElementById("but1").addEventListener("click", function() {document.getElementById("p1").innerHTML = "<h1>Nieuwe tekst</h1>";});
+        /*document.querySelectorAll("h1 > h2")[0].innerText = "tussen"; */      getComputedStyle(document.getElementById('p1')).getPropertyValue('color');
+        document.getElementById('p1').style.color = "red";
+        
+    </script>
+</body>
+</html>

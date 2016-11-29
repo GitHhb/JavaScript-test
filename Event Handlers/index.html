@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        .colorButtonOff {color: red;}
+        .colorButtonOn  {color: aqua;}
+        .colorButtonOffIf {background-color: antiquewhite;}
+        .colorButtonOnIf  {background-color: darkred;}
+        
+    </style>
+</head>
+<body>
+    <input id="eventClick" type="button" class="colorButtonOffIf" value="click me!" >
+    
+    <script>
+        var x = function() {alert("My alert")};
+        var toggleColor = function() {buttonId.setAttribute("class", "colorButtonOn")};
+        var toggleColorOff = function() {buttonId.setAttribute("class", "colorButtonOff")};
+        function toggleColorIf () {
+            if (buttonId.getAttribute("class") == "colorButtonOnIf")
+                buttonId.setAttribute("class", "colorButtonOffIf")
+            else
+                buttonId.setAttribute("class", "colorButtonOnIf")
+        };
+        var buttonId = document.getElementById('eventClick');
+        buttonId.addEventListener('click', x );
+        buttonId.addEventListener('mouseover', toggleColorIf);
+        buttonId.addEventListener('mouseout', toggleColorIf);
+        
+    </script>
+</body>
+</html>
