@@ -1,6 +1,6 @@
 var Counter = function (screenObj, min = 10, sec = 0, speed = 1000) {
     // Init vars
-    var self = this;
+    // var self = this;
     var countInterval;
     this.minCnt = min;
     this.secCnt = sec; 
@@ -22,19 +22,19 @@ Counter.prototype.display = function () {
 };
         
 Counter.prototype.countDown = function () {
-    if (this.minCnt == 0 && this.secCnt == 0) {
-        clearInterval(this.countInterval);
-        this.display();
+    if (self.minCnt == 0 && self.secCnt == 0) {
+        clearInterval(self.countInterval);
+        self.display();
     } else if (this.secCnt > 0) {
-        this.secCnt--;
-        console.log(this.secCnt, this.x, this.constructor.name, self.constructor.name);
-        this.display();
+        self.secCnt--;
+        // console.log(this.secCnt, this.x, this.constructor.name, self.constructor.name);
+        self.display();
         
         return;
     } else { // secCnt == 0 && minCnt > 0
-        this.secCnt = 59;
-        this.minCnt--;
-        this.display();
+        self.secCnt = 59;
+        self.minCnt--;
+        self.display();
         return;
     }
 };
