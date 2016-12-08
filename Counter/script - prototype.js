@@ -1,6 +1,6 @@
 var Counter = function (screenObj, min = 10, sec = 0, speed = 1000) {
     // Init vars
-    var self = this;
+    var selfx = this;
     this.timer;
     this.timerSet = false; // bool to indicate whether countInterval is running
     this.min = min;
@@ -26,32 +26,27 @@ Counter.prototype.display = function () {
 Counter.prototype.countDown = function () {
     if (this.minCnt == 0 && this.secCnt == 0) {
         clearInterval(this.timer);
-        this.display();
     } else if (this.secCnt > 0) {
         this.secCnt--;
-//        console.log(this.secCnt, this.x, this.constructor.name, self.constructor.name);
-        this.display();
-        
-        return;
     } else { // secCnt == 0 && minCnt > 0
         this.secCnt = 59;
         this.minCnt--;
-        this.display();
-        return;
     }
+//    console.log(this.secCnt, this.x, this.constructor.name, self.constructor.name);
+    this.display();
 };
 
 Counter.prototype.start = function () {
-    this.display();
-    if (! this.timerSet) {
-            this.timer = setInterval(this.countDown.bind(this), this.speed);
-            this.timerSet = true;
-    };
+        if (! this.timerSet) {
+                this.timer = setInterval(this.countDown.bind(this), this.speed);
+                this.timerSet = true;
+        };
+//        console.log("START self/this: ", self.constructor.name, this.constructor.name);
+        this.display();
 };
 
 Counter.prototype.reset = function () {
-    clearInterval(this.timer);
-    this.timerSet = false;
+    this.stop();
     this.set();
     this.start();
 };
