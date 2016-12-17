@@ -27,28 +27,41 @@
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var xmlDoc = this.responseXML;
+			console.log(xmlDoc);
             txt = "";
-            x = xmlDoc.getElementsByTagName("longitude");
+            x = xmlDoc.getElementsByTagName("Placemark");
             for (i = 0; i < x.length; i++) {
-                txt = txt + x[i].childNodes[0].nodeValue + ", " + x[i].childNodes[0] + "<br>";
+				txt += "==> " + x[i].getElementsByTagName("name")[0].innerHTML + "<br>";
+				txt += "==> " + x[i].getElementsByTagName("coordinates")[0].innerHTML + "<br>";
+				console.log(x[i].getElementsByTagName("name"));
+				for (var j = 1; j < x[i].childNodes.length-1; j+=2 ){
+                	txt = txt + x[i].childNodes[0].nodeValue + ", " + x[i].childNodes[j].nodeName+ x[i].childNodes[j].innerHTML + "<br>";
+				}
             }
-            document.getElementById("mapdata").innerHTML = txt;
+            var mydoc = document.getElementById("mapdata");
+			mydoc.innerHTML = txt;
+			
         }
     };
     xhttp.open("GET", mapURL, true);
     xhttp.send();
 
 
-	var mymap = L.map('mapid').setView([51.497469, 4.271493], 15);
 
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+	var baselayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		id: 'mapbox.streets'
-	}).addTo(mymap);
+	});
 
+	var mymap = L.map('mapid', {
+		center: [51.497469, 4.271493],
+		zoom: 15,
+		layers: [baselayer]
+	});
+	
 	L.marker([51.5, 4.19]).addTo(mymap)
 		.bindPopup("<b>Hello world!</b><br />I am a popup."); //.openPopup();
 
@@ -65,7 +78,7 @@
         [51.500074, 4.268634]
 	]).addTo(mymap).bindPopup("I am a polygon.");
 
-    L.polyline([
+    var fietsregister = L.polyline([
 [51.712056724476, 4.6390017463348],
 [51.711945941238,                        4.6387208565118],
 [51.711909527691,                        4.6386491111928],
@@ -225,10 +238,10 @@
 [51.676932860733,                        4.6196775505517]
 
 
-    ]).addTo(mymap).bindPopup("I am a polygon.");
+    ]);
 
 
-L.polyline([
+var pdok = L.polyline([
 
 [51.497191566555344,4.283596226412484],
 [51.49718195593307,4.2835675839282565],
@@ -450,7 +463,22 @@ L.polyline([
 [51.482555577258495,4.279905833804539],
 
 [51.48232709229616,4.280032602759325]
-]).addTo(mymap).bindPopup("I am a polygon.");
+]);
+
+var emptyLayer = L.marker();
+
+	var baseMaps = {
+		"Basismap": baselayer,
+		"No maps": emptyLayer
+	}
+
+	var overlayMaps = {
+		"Fiets web site": fietsregister,
+		// "PDOK nationale fietsroutes": pdok
+	}
+
+	var mycontrol = L.control.layers(baseMaps, overlayMaps).addTo(mymap);
+	mycontrol.addOverlay(pdok, "new PDOK");
 
 
 	// var popup = L.popup();
