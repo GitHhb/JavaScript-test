@@ -8,7 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-
+    <link rel="stylesheet" href="fietsroute-editor.css" />
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
 	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
 
@@ -25,31 +25,54 @@
 	var mycontrol; // The base layer
 	var knooppuntLayer; // pdok marker layer
 	var knooppunten = []; // Array of type Knooppunt
-    var netwerken = []; // Array of type NetwerkDeel
     var knooppuntenLoaded = false;
+    var netwerken = []; // Array of type Netwerken
     var netwerkenLoaded = false;
+    var netwerkK2K = []; // Array of type NetwerkK2K
 
 
+    // Knooppunten
+    // Data obtained from layer "knooppunten" 
 	// Knooppunt type delcaration
 	function Knooppunt (nr, point, xLng, yLat) {
 		this.nr = nr;
         this.point = point; // type L.latLng
 	}
 
-	// NetwerkDeel type declaration
-	function NetwerkDeel (name, point, coordinateArr) {
-		this.name = name;
-        this.point = point; // type L.latLng
-		this.coordinateArr = coordinateArr; // Array of L.latLng => coordinates for this network part (polyline)
+    // Netwerk onderdelen
+    // Data obtained from layer "netwerken"
+	// Netwerken type declaration
+	function Netwerken (name, point, coordinateArr) {
+		this.name = name;   // network name, | from kml file
+        this.point = point; // type L.latLng, | denotes the network location, from kml file
+		this.coordinateArr = coordinateArr; // Array of L.latLng | coordinates for this route part (polyline), from kml file
+        this.first = null; // index to Knooppunt array | knooppunt corresponding to first route coords, coordinateArr[0], computed
+        this.last = null; // index to Knooppunt array | knooppunt corresponding to last route coords, coordinateArr[length-1], computed
 	}
 
-	// construct a new NetwerkDeel object from a string of coordinates as returned in a kml file
-	// return: new NetwerkDeel object
-	var stringToNetwerkDeel = function (name, coordinateString) {
+    // Netwerk parts from Knooppunt to Knooppunt
+    // Constructed by us
+    // NeterkK2K type declaration
+    function NetwerkK2K () {
+        this.first = null; // index to Knooppunt array | knooppunt corresponding to first route coords, coordinateArr[0], computed
+        this.last = null; // index to Knooppunt array | knooppunt corresponding to last route coords, coordinateArr[length-1], computed
+        this.netwerkenArr = []; // Array of indexes to array netwerken 
+    }
+
+	// construct a new Netwerken object from a string of coordinates as returned in a kml file
+	// return: new Netwerken object
+	var stringToNetwerken = function (name, coordinateString) {
 		var coordinateArr = [];
 
-		return new NetwerkDeel(name, coordinateArr);
+		return new Netwerken(name, coordinateArr);
 	}
+
+    // Compare coordinates
+    // Args: c1, c2 of type L.latLng
+    // return: true | false
+    function compareCoord(c1, c2) {
+        return (c1.lat === c2.lat && c1.lng === c2.lng);
+    }
 
 	// Args: layerName = "knooppunten" | "netwerken"
 	//		 map = baseMap handle
@@ -119,23 +142,24 @@
 
     
     function extractNetwerken (xmlDoc) {
-        // A knooppunt section is marked by the "Placemark" tag
+        // Every "Placemark" tag marks a route part
         var x = xmlDoc.getElementsByTagName("Placemark");
+        // Store every route part in the "netwerken" array
         for (var i = 0; i < x.length; i++) {
-            var netwerkLineString = []; // LineString of this NetwerkDeel
+            var netwerkLineString = []; // LineString of this Netwerken
             // Tag "name" marks the netwerk name
             var netwerkName = x[i].getElementsByTagName("name")[0].innerHTML;
             // Tag "Point > coordinates" marks the Point coordinates
             var pointArr = x[i].getElementsByTagName("Point")[0].getElementsByTagName("coordinates")[0].innerHTML.split(',');
             var pointCoord = L.latLng(pointArr[1], pointArr[0]);
-            // Tag "LineString > coordinates" marks the coordinates
+            // Tag "LineString > coordinates" marks the route coordinates
             var lineCoordArr = x[i].getElementsByTagName("LineString")[0].getElementsByTagName("coordinates")[0].innerHTML.split(' ');
             // console.log("NETWERKEN", lineCoordArr);
             for (var j = 0; j < lineCoordArr.length; j++) {
                 var s = lineCoordArr[j].split(',');
                 netwerkLineString.push(L.latLng(s[1], s[0]));
             }
-            netwerken.push(new NetwerkDeel(netwerkName, pointCoord, netwerkLineString));
+            netwerken.push(new Netwerken(netwerkName, pointCoord, netwerkLineString));
             // console.log(knptCoords[1] + ", " + knptCoords[0]);
         }
         // var mydoc = document.getElementById("mapdata");
@@ -152,7 +176,7 @@
 		return L.layerGroup(knptMarkers);
 	}
 
-	// Arg: netwerken = array of type NetwerkDeel
+	// Arg: netwerken = array of type Netwerken
 	function netwerkenLayerGroup (netwerken) {
         var networkLayerGroup = L.layerGroup();
 		// create array with knooppunt markers
@@ -173,10 +197,9 @@
                     var showLine = false;
                     var layer;
                     return function (e) {
-                        console.log(showLine, layer);
+                        // Toggle line selection
                         if (!showLine) {
                             netwerkC.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'yellow'}));
-                            console.log("LayerId: ", netwerkC.getLayerId(layer));
                         } else {
                             netwerkC.removeLayer(netwerkC.getLayerId(layer));
                         };
@@ -192,40 +215,79 @@
     function matchEndPoints () {
         var netwerkMarkers = [];
         var epAll = [];
-        epAll[0] = epAll[1] = epAll[2] = []; // all endpoints
-        for (n of netwerken) {
+        var ep = [];
+        epAll[0] = []; epAll[1] = []; epAll[2] = []; // all endpoints
+        for (var n = 0; n < netwerken.length; n++) {
             var ep = [];
-            for (i of knooppunten) {
-                // look for match
-                if ( (i.point.lat == n.coordinateArr[0].lat) && (i.point.lng == n.coordinateArr[0].lng) )  {
+            for (var i = 0; i < knooppunten.length; i++) {
+                // look for match at first coord of line
+                if ( compareCoord(knooppunten[i].point, netwerken[n].coordinateArr[0]) )  {
+                    // Input sanity check, we shouldn't already have a first endpoint
+                    if (netwerken[n].first) console.log("WARNING: double 'first' linepoint found for network: ", netwerken[n].name);
                     // console.log("match for ", i.nr);
                     ep.push(i);
+                    netwerken[n].first = i;
                 } 
-                if ( (i.point.lat == n.coordinateArr[n.coordinateArr.length-1].lat) && (i.point.lng == n.coordinateArr[n.coordinateArr.length-1].lng) )  {
-                    // console.log("match for ", i.nr);
+                // look for match at last coord of line
+                if ( compareCoord(knooppunten[i].point, netwerken[n].coordinateArr[netwerken[n].coordinateArr.length-1]) )  {
+                    // Input sanity check, we shouldn't already have a last endpoint 
+                    if (netwerken[n].last) console.log("WARNING: double 'last' linepoint found for network: ", netwerken[n].name);
                     ep.push(i);
+                    netwerken[n].last = i;
                 }
             }
-            // console.log(ep.length, epAll.length);
-            epAll[ep.length][epAll.length] = n;
+            // console.log("==1> ", "epAll[" + ep.length + "]", "epAll.length: " + epAll.length);
+            epAll[ep.length].push(n);
+            // console.log("==2> n: ", n);
+            // console.log("==3> 0: " + epAll[0].length + " |1:" + epAll[1].length + " |2:" + epAll[2].length + " - " + ep.length);
             if (ep.length == 0) {
-                netwerkMarkers.push(L.polyline(n.coordinateArr, {color: 'red'})
+                netwerkMarkers.push(L.polyline(netwerken[n].coordinateArr, {color: 'red'})
                     .on('click', function () {
-                        var myn = n; return function(e){console.log(e, myn.name);
+                        var myn = netwerken[n];
+                        var myk = knooppunten;
+                        return function(e){console.log(e, myn.name, myk[myn.first], myk[myn.last]);
                     } }()));
                 // console.log("#0 Endpoints found: ", n);
             } else if (ep.length == 1) {
                 // console.log("#1 Endpoints found: ", n);
-                netwerkMarkers.push(L.polyline(n.coordinateArr, {color: 'black'}).on('click', function(e){console.log(n.name);}));
+                netwerkMarkers.push(L.polyline(netwerken[n].coordinateArr, {color: 'black'})
+                    .on('click', function () {
+                        var myn = netwerken[n];
+                        var myk = knooppunten;
+                        return function(e){console.log(e, myn.name, myk[myn.first], myk[myn.last]);
+                    } }()));
+                    // .on('click', function(e){console.log(netwerken[n].name, netwerken[n].first, netwerken[n].last);}));
             } else if (ep.length == 2) {
                 // console.log("#2 Endpoints found: ", n);
-                netwerkMarkers.push(L.polyline(n.coordinateArr, {color: 'blue'}).on('click', function(e){console.log(n.name);}));
+                // console.log("==4> MATCH found: ", netwerken[n]);
+                netwerkMarkers.push(L.polyline(netwerken[n].coordinateArr, {color: 'blue'})
+                    .on('click', function () {
+                        var myn = netwerken[n];
+                        var myk = knooppunten;
+                        return function(e){console.log(e, myn.name, myk[myn.first], myk[myn.last]);
+                    } }()));
+                    // .on('click', function(e){console.log(netwerken[n].name, netwerken[n].first, netwerken[n].last);}));
             } else {
                 console.log("WARNING: More than 2 Endpoints found, this is unexpected, not processing this data.", n);
                 // netwerkMarkers.push(L.polyline(n.coordinateArr, {color: 'yellow'}).on('click', function(e){console.log(n.name);}));
             }
         }
-        console.log("Processed all endpoints")
+        // console.log("Processed all endpoints", "2 endpoints: " + epAll[2].length, "1 endpoint: " + epAll[1].length, "0 endpoint: " + epAll[0].length);
+        console.log("==3> 0: " + epAll[0].length + " |1:" + epAll[1].length + " |2:" + epAll[2].length + " - " + ep.length);
+        // console.log("==3> 0: " + epAll[0] + " |1:" + epAll[1] + " |2:" + epAll[2] + " - " + ep.length);
+
+        // Construct neterkK2K
+        // Try to construct complete netwerk parts fromt knooppunt to knooppunt
+
+        // Add all netwerken with 2 endpoints
+        netwerkK2K = epAll[2].slice();
+        
+        // Try to connect netwerken with 1 endpoint
+        for (var i = 0; i < epAll[1].length; i++) {
+
+        }
+
+        console.log(netwerkK2K, epAll[2]);
         // check if open endpoints can be matched
         // for (n of epAll[0]) {
         //     for (i of epAll[1]) {
