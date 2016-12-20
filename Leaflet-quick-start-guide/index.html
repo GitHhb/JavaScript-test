@@ -2,7 +2,7 @@
 <html>
 <head>
 	
-	<title>Quick Start - Leaflet</title>
+	<title>Fietsroute Editor</title>
 
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -83,12 +83,10 @@
 				var xmlDoc = this.responseXML;
                 console.log("LOADING all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
 				if ( layerName == "knooppunten") {
-					console.log("---------> knooppunt");
 					extractKnooppunten(xmlDoc);
                     layerControl.addOverlay(knooppuntenLayerGroup(knooppunten), "My Knooppunt layer");
                     knooppuntenLoaded = true;
 				} else { // layerName == "netwerken"
-					console.log("---------> netwerk");
 					extractNetwerken(xmlDoc);
                     layerControl.addOverlay(netwerkenLayerGroup(netwerken), "My Netwerk layer");
                     netwerkenLoaded = true;
@@ -165,8 +163,10 @@
 		// netwerkMarkers.push(L.marker(i.coordinateArr[0], {icon: L.divIcon({html: "<i>" + i.name + "</i>"})})
 		// 	.bindPopup(i.name + "<br>(" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + i.coordinateArr + ")")
 		// 	);
-            networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({html: "<i>POINT: " + i.name + "</i>"})})
-                .bindPopup(i.name + "<br>(" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")") //i.coordinateArr + ")")
+			networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({html: "<i>" + i.name.split('.')[1] + "</i>"})})
+                .bindPopup(i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
+							+ i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
+				) //i.coordinateArr + ")")
                 .on('click', function () {
                     var iC = i;
                     var netwerkC = networkLayerGroup; 

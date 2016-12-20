@@ -10,24 +10,24 @@
 <script src="leaflet-beautify-marker.js"></script>
 <script>
     window.onload = function () {
-        var map = L.map('map').setView([51.497469, 4.271493], 9);
+        var map = L.map('map').setView([33.738045, 73.084488], 9);
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        L.marker([51.497469, 4.271493], { icon: L.BeautifyIcon.icon(), draggable: true }).addTo(map).bindPopup("I'm Beautify");
+        L.marker([33.89093747081252, 72.7734375], { icon: L.BeautifyIcon.icon(), draggable: true }).addTo(map).bindPopup("I'm Beautify");
         var options = {
             icon: 'bus'
                 , borderColor: '#b3334f'
                 , textColor: '#b3334f'
         };
-        L.marker([51.497469, 4.271493], { icon: L.BeautifyIcon.icon(options), draggable: true }).addTo(map).bindPopup("I'm Beautify");
+        L.marker([33.89093747081252, 72.9107666015625], { icon: L.BeautifyIcon.icon(options), draggable: true }).addTo(map).bindPopup("I'm Beautify");
         options = {
             icon: 'plane'
                 , borderColor: '#8D208B'
                 , textColor: '#8D208B'
                 , backgroundColor: 'transparent'
         };
-        L.marker([51.497469, 4.271493], { icon: L.BeautifyIcon.icon(options), draggable: true }).addTo(map).bindPopup("I'm Beautify");
+        L.marker([33.89093747081252, 73.0426025390625], { icon: L.BeautifyIcon.icon(options), draggable: true }).addTo(map).bindPopup("I'm Beautify");
         options = {
             icon: 'ambulance'
                , borderColor: 'Red'
