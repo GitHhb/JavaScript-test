@@ -12,6 +12,12 @@
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
 	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
 
+	<!-- Beautify markers -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="BeautifyMarker/leaflet-beautify-marker-icon.css">
+	<script src="BeautifyMarker/leaflet-beautify-marker-icon.js"></script>
+	<script src="BeautifyMarker/leaflet-beautify-marker.js"></script>
 
 	
 </head>
@@ -114,7 +120,7 @@
                     layerControl.addOverlay(netwerkenLayerGroup(netwerken), "My Netwerk layer");
                     netwerkenLoaded = true;
 				}
-                if (knooppuntenLoaded && netwerkenLoaded) {
+                if (false && knooppuntenLoaded && netwerkenLoaded) {
                     console.log("loaded all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
                     layerControl.addOverlay(matchEndPoints(), "Matching endpoints");
                 }
@@ -171,7 +177,29 @@
 		// create array with knooppunt markers
 		var knptMarkers = [];
 		for (i of knooppunten) {
-            knptMarkers.push(L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")"));
+            knptMarkers.push(
+				L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
+				.bindTooltip(i.nr, {
+					permanent: true, 
+					direction: 'right',
+					offset: [-35, 0],
+					className: 'markerTooltip'
+				}));
+
+			// Beautify marker
+			// options = {
+            // 	isAlphaNumericIcon: true
+            //     , text: i.nr
+            //     , iconShape: 'marker'
+            //     , borderColor: '#00ABDC'
+            //     , textColor: '#00ABDC'
+            //     , innerIconStyle: 'margin-top:0;'
+       		// };
+			// knptMarkers.push(L.BeautifyMarker.marker(i.point, { icon: L.BeautifyIcon.icon(options), draggable: false })
+			// 	.bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
+			// );
+       
+
 		}
 		return L.layerGroup(knptMarkers);
 	}
@@ -187,10 +215,30 @@
 		// netwerkMarkers.push(L.marker(i.coordinateArr[0], {icon: L.divIcon({html: "<i>" + i.name + "</i>"})})
 		// 	.bindPopup(i.name + "<br>(" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + i.coordinateArr + ")")
 		// 	);
-			networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({html: "<i>" + i.name.split('.')[1] + "</i>"})})
+
+		// Beautify marker start
+		// options = {
+        //     	isAlphaNumericIcon: true
+        //         // , text: i.name
+		// 		, text: i.name.split('.')[1]
+        //         // , iconShape: 'doughnut'
+        //         , borderColor: '#00ABDC'
+        //         , textColor: '#00ABDC'
+        //         , innerIconStyle: 'margin-top:0;'
+       	// 	};
+		// 	networkLayerGroup.addLayer(L.BeautifyMarker
+		// 		.marker(i.point, { icon: L.BeautifyIcon.icon(options), draggable: false })
+		// 		.bindPopup(i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
+		// 			+ i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
+		// 	)
+		// Beautify marker end
+
+			// normal marker start
+			networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({html: "<i>" + i.name.split('.')[1] + "</i>", className: 'netwerkDivIcon'})})
                 .bindPopup(i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
 							+ i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
 				) //i.coordinateArr + ")")
+			// normal marker end
                 .on('click', function () {
                     var iC = i;
                     var netwerkC = networkLayerGroup; 

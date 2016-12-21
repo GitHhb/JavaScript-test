@@ -3,3 +3,47 @@
     height: 10px;
     color: red;
 }
+
+.myCSSClass {
+  background: green;
+  border: 2px solid cyan
+}
+.leaflet-tooltip-left.myCSSClass::before {
+  border-left-color: cyan;
+}
+.leaflet-tooltip-right.myCSSClass::before {
+  border-right-color: cyan;
+}
+
+.markerTooltip {
+    color: red;
+    border-width: 3px;
+    border-color: black;
+}
+
+.netwerkDivIcon
+{
+  background:blue;
+  border:10px solid rgba(255,255,255,0.5);
+  color:blue;
+  font-weight:bold;
+  text-align:center;
+  border-radius:50%;
+  line-height:40px;
+  line-width:30px;
+  width:20px;
+  height:20px;
+}
+
+.netwerkDivIconx
+{
+  background:green;
+  border:10px solid rgba(0,255,255,0.5);
+  color:green;
+  font-weight:bold;
+  text-align:left;
+  border-radius:50%;
+  line-height:3px;
+  width:180px;
+  height:140px;
+}
