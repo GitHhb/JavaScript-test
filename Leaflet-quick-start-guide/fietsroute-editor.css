@@ -21,7 +21,7 @@
     border-color: black;
 }
 
-.netwerkDivIcon
+.netwerkDivIconSelected
 {
   background:blue;
   border:10px solid rgba(255,255,255,0.5);
@@ -35,9 +35,10 @@
   height:20px;
 }
 
-.netwerkDivIconx
+.netwerkDivIcon
 {
   background:green;
+  background-size: 60px 60px;
   border:10px solid rgba(0,255,255,0.5);
   color:green;
   font-weight:bold;
@@ -47,3 +48,6 @@
   width:180px;
   height:140px;
 }
+/*.myFietsrouteLayerClass {
+  color: purple;
+}*/
