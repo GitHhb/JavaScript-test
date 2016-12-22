@@ -38,7 +38,7 @@
     var netwerken = []; // Array of type NetwerkenType
     var netwerkenLoaded = false;
     var netwerkK2K = []; // Array of type NetwerkK2K
-    var myFietsrouteLayer = new L.LayerGroup(); // Layer with all parts for my fietsroute
+    var myFietsrouteLayer = new L.LayerGroup(); // Layer with all parts for my own fietsroute
 
 
     // Knooppunten
@@ -194,7 +194,9 @@
 					direction: 'right',
 					offset: [-5, 0],
 					className: 'markerTooltip'
-				}));
+				})
+                .on('click', updateMyFietsrouteLayer("knooppunt", i))
+                );
                 
 
 			// Beautify marker
@@ -214,6 +216,44 @@
 		}
 		return L.layerGroup(knptMarkers);
 	}
+
+    var iconOrange = L.icon({
+        iconUrl: 'Image/map_marker-orange-small.png',
+        iconSize: [32, 37],
+        iconAnchor: [14, 36],
+        popupAnchor: [-3, -76],
+        // shadowUrl: 'my-icon-shadow.png',
+        shadowSize: [68, 95],
+        shadowAnchor: [22, 94]
+    }); 
+
+    // Args: type = "knooppunt" | "netwerken"
+    var updateMyFietsrouteLayer = function (type, iC) {
+        var visible = false;
+        var layer;
+        // Toggle line selection
+        return function (e) {
+            console.log(visible, layer, e._leaflet_id);
+            if (!visible) {
+                if (type == "netwerken") {
+                    myFietsrouteLayer.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'yellow'}));
+                    console.log("ADDed alayer: " + myFietsrouteLayer.getLayerId(layer));
+                } else { // type == "knooppunt"
+                    myFietsrouteLayer.addLayer(layer = L.marker(iC.point, {icon: iconOrange}));
+                    // var layerId = myFietsrouteLayer.getLayerId(layer);
+                    // layer.on("click", myFietsrouteLayer.removeLayer(layerId));
+                }
+            } else {
+                console.log("REMOVE");
+                // if (type == "netwerken") {
+                    myFietsrouteLayer.removeLayer(myFietsrouteLayer.getLayerId(layer));
+                // } else { // type == "knooppunt"
+
+                // }
+            };
+            visible = !visible;
+        }
+    }
 
 	// Arg: netwerken = array of type NetwerkenType
 	function netwerkenLayerGroup (netwerken) {
@@ -261,20 +301,23 @@
                                 + i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
                 )
 			// normal marker end
-                .on('click', function () {
-                    var iC = i;
-                    // var netwerkC = networkLayerGroup; 
-                    var showLine = false;
-                    var layer;
-                    return function (e) {
-                        // Toggle line selection
-                        if (!showLine) {
-                            myFietsrouteLayer.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'yellow'}));
-                        } else {
-                            myFietsrouteLayer.removeLayer(myFietsrouteLayer.getLayerId(layer));
-                        };
-                        showLine = !showLine;
-                }}() )
+            // function in outer scope
+                .on('click', updateMyFietsrouteLayer("netwerken", i))
+            // function in inner scope
+                // .on('click', function () {
+                //     var iC = i;
+                //     // var netwerkC = networkLayerGroup; 
+                //     var visible = false;
+                //     var layer;
+                //     return function () {
+                //         // Toggle line selection
+                //         if (!visible) {
+                //             myFietsrouteLayer.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'yellow'}));
+                //         } else {
+                //             myFietsrouteLayer.removeLayer(myFietsrouteLayer.getLayerId(layer));
+                //         };
+                //         visible = !visible;
+                // }}() )
             );
             // networkLayerGroup.addLayer(L.polyline(i.coordinateArr, {color: 'red'})); 
         // netwerkMarkers.push(L.polyline(i.coordinateArr, {color: 'red'}).on('click', function(e){console.log(e);}));
@@ -282,6 +325,7 @@
 		return networkLayerGroup;
 	}
 
+    
     function matchEndPoints () {
         var netwerkMarkers = [];
         var epAll = [];
@@ -429,14 +473,14 @@
 	// mycontrol.addOverlay(xtd, "2e knooppunten");
 	// mycontrol.addLayer(getKnooppunten(), "knoop");
 
-    // Convenience method: show coordinates of map location when map is clicked
-	function onMapClick(e) {
-		L.popup()
-			.setLatLng(e.latlng)
-			.setContent("Coordinaten:<br>" + e.latlng.toString())
-			.openOn(mymap);
-	}
-	mymap.on('click', onMapClick);
+    // // Convenience method: show coordinates of map location when map is clicked
+	// function onMapClick(e) {
+	// 	L.popup()
+	// 		.setLatLng(e.latlng)
+	// 		.setContent("Coordinaten:<br>" + e.latlng.toString())
+	// 		.openOn(mymap);
+	// }
+	// mymap.on('click', onMapClick);
 
     // Implement "Toon route" button
     htmlMijnRoute = document.getElementById("mijn-route");
