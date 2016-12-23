@@ -35,8 +35,15 @@
   height:20px;
 }
 
-.netwerkDivIcon
-{
+.markerDivIcon {
+  background: darkorange;
+  border:10px solid rgba(255,128,0,0.1);
+  text-align: left;
+  line-height: 0px;
+  border-radius:50%;
+}
+
+.netwerkDivIcon {
   background:green;
   background-size: 60px 60px;
   border:10px solid rgba(0,255,255,0.5);
