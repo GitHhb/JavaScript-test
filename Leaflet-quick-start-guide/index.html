@@ -231,7 +231,7 @@
     var updateMyFietsrouteLayer = function (type, iC) {
         var visible = false;
         var layer;
-        // Toggle line selection
+        // Toggle selection and thus visibility
         return function (e) {
             console.log(visible, layer, e._leaflet_id);
             if (!visible) {
@@ -240,15 +240,15 @@
                     console.log("ADDed alayer: " + myFietsrouteLayer.getLayerId(layer));
                 } else { // type == "knooppunt"
                     myFietsrouteLayer.addLayer(layer = L.marker(iC.point, {icon: iconOrange}));
+                    console.log("Layer==5> ", layer);
                     // var layerId = myFietsrouteLayer.getLayerId(layer);
-                    // layer.on("click", myFietsrouteLayer.removeLayer(layerId));
+                    layer.on("click", myFietsrouteLayer.removeLayer(layer));
                 }
             } else {
                 console.log("REMOVE");
                 // if (type == "netwerken") {
-                    myFietsrouteLayer.removeLayer(myFietsrouteLayer.getLayerId(layer));
+                    myFietsrouteLayer.removeLayer(layer);
                 // } else { // type == "knooppunt"
-
                 // }
             };
             visible = !visible;
