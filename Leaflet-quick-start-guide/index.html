@@ -24,7 +24,7 @@
 <body>
 
 <div id="mapdata">Loading...</div>
-
+<div id="message"></div>
 <div id="mapid" style="width: 1200px; height: 800px;"></div>
 <button id="toon-mijn-route" onclick="toonMijnRoute()">Toon route</button>
 <div id="mijn-route">Nog geen route gedefinieerd</div>
@@ -86,6 +86,11 @@
 
 		return new NetwerkenType(name, coordinateArr);
 	}
+
+    var messageTag = document.getElementById("message");
+    function showMessage(message) {
+        messageTag.innerHTML = message;
+    }
 
     // Compare coordinates
     // Args: c1, c2 of type L.latLng
@@ -187,6 +192,64 @@
         // var mydoc = document.getElementById("mapdata");
     }
 
+    var iconOrange = L.icon({
+        iconUrl: 'Image/marker-icon-orange.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [-3, -76],
+        // shadowUrl: 'my-icon-shadow.png',
+        shadowSize: [68, 95],
+        shadowAnchor: [22, 94]
+    }); 
+
+    // Args: type = "knooppunt" | "netwerken"
+    // layer: any layer type, f.e.: L.polyline or L.marker
+    var updateMyFietsrouteLayer = function (type, index, layer) {
+        var selected = false;
+        // var layer;
+        var myFietsrouteIndex;
+        // Toggle selection and thus visibility
+        return function (e) {
+            // console.log(layer, e._leaflet_id);
+            if (!selected) {
+                // add fietsroute element if adjacent to existing fietsroute
+                if (myFietsroute.length == 0) {
+                    // Only selection of knooppunt allowed
+                    if (type != "knooppunt") {
+                        showMessage("Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.");
+                        return;
+                    }
+                } else {
+                    // Check if coords match
+                    if (type == "knooppunt") {
+                        if (!compareCoord(myFietsroute[myFietsroute.length - 1], knooppunten[index].nr)) {
+                            showMessage("Knooppunt sluit niet aan route aan.");
+                            return;
+                        }
+                    } else { // type = "netwerken"
+                        if (!compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[0])
+                            && !compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[netwerken[index].coordinateArr.length - 1])
+                        ) {
+                            showMessage("Netwerk sluit niet aan route aan.");
+                            return;
+                        }
+                    }
+                }
+                myFietsrouteLayer.addLayer(layer);
+                myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
+                console.log("PUSHED index: " + myFietsrouteIndex);
+            } else {
+                // remove fietsroute element
+                console.log("REMOVE");
+                myFietsrouteLayer.removeLayer(layer);
+                myFietsroute.splice(myFietsrouteIndex, 1);
+            };
+            selected = !selected;
+            showMessage(" ");
+            toonMijnRoute();
+        }
+    }
+
 	// Create layergroup of knooppunten
 	// Arg: knooppunten = array of type Knooppunt
 	function knooppuntenLayerGroup (knooppunten) {
@@ -209,77 +272,17 @@
                         riseOnHover: true,
                         title: "I'm the title"
                     })})
-				.bindTooltip(i.nr, {
+				.bindTooltip(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
                     riseOnHover: true,
 					direction: 'top',
 					offset: [-14, -55],
 					className: 'markerTooltip'
 				})
-                .on('click', updateMyFietsrouteLayer("knooppunt", i, k))
+                .on('click', updateMyFietsrouteLayer("knooppunt", k,  L.marker(i.point, {icon: iconOrange}) ))
                 );
-                
-
-			// Beautify marker
-			// options = {
-            // 	isAlphaNumericIcon: true
-            //     , text: i.nr
-            //     , iconShape: 'marker'
-            //     , borderColor: '#00ABDC'
-            //     , textColor: '#00ABDC'
-            //     , innerIconStyle: 'margin-top:0;'
-       		// };
-			// knptMarkers.push(L.BeautifyMarker.marker(i.point, { icon: L.BeautifyIcon.icon(options), draggable: false })
-			// 	.bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
-            // .on('click', updateMyFietsrouteLayer("knooppunt", i))
-			// );
-       
-
 		}
 		return L.layerGroup(knptMarkers);
 	}
-
-    var iconOrange = L.icon({
-        iconUrl: 'Image/marker-icon-orange.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [-3, -76],
-        // shadowUrl: 'my-icon-shadow.png',
-        shadowSize: [68, 95],
-        shadowAnchor: [22, 94]
-    }); 
-
-    // Args: type = "knooppunt" | "netwerken"
-    var updateMyFietsrouteLayer = function (type, iC, index) {
-        var visible = false;
-        var layer;
-        var fietsrouteIndex;
-        // Toggle selection and thus visibility
-        return function (e) {
-            // console.log(layer, e._leaflet_id);
-            if (!visible) {
-                if (type == "netwerken") {
-                    myFietsrouteLayer.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'orange'}));
-                    console.log("ADDed alayer: " + myFietsrouteLayer.getLayerId(layer));
-                    fietsrouteIndex = myFietsroute.push(new MyFietsrouteType("n", index)) - 1;
-                } else { // type == "knooppunt"
-                    myFietsrouteLayer.addLayer(layer = L.marker(iC.point, {icon: iconOrange}));
-                    console.log("Layer==5> ", layer);
-                    fietsrouteIndex = myFietsroute.push(new MyFietsrouteType("k", index)) - 1;
-                    // var layerId = myFietsrouteLayer.getLayerId(layer);
-                }
-                    // layer.once("click", layer.remove);
-            } else {
-                console.log("REMOVE");
-                // if (type == "netwerken") {
-                    myFietsrouteLayer.removeLayer(layer);
-                    myFietsroute.splice(fietsrouteIndex, 1);
-                // } else { // type == "knooppunt"
-                // }
-            };
-            visible = !visible;
-            toonMijnRoute();
-        }
-    }
 
 	// Arg: netwerken = array of type NetwerkenType
 	function netwerkenLayerGroup (netwerken) {
@@ -288,35 +291,6 @@
 		var netwerkMarkers = [];
 		for (n in netwerken) {
             i = netwerken[n];
-			// console.log(i);
-			// netwerkMarkers.push(L.marker([i.coordinateArr[0].lat, i.coordinateArr[0].lng]).bindPopup(i.name + "<br>(" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + i.coordinateArr + ")"));
-		// netwerkMarkers.push(L.marker(i.coordinateArr[0], {icon: L.divIcon({html: "<i>" + i.name + "</i>"})})
-		// 	.bindPopup(i.name + "<br>(" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + i.coordinateArr + ")")
-		// 	);
-
-		// Beautify marker start
-		// options = {
-        //     	isAlphaNumericIcon: true
-        //         // , text: i.name
-		// 		, text: i.name.split('.')[1]
-        //         // , iconShape: 'doughnut'
-        //         , borderColor: '#00ABDC'
-        //         , textColor: '#00ABDC'
-        //         , innerIconStyle: 'margin-top:0;'
-       	// 	};
-		// 	networkLayerGroup.addLayer(L.BeautifyMarker
-		// 		.marker(i.point, { icon: L.BeautifyIcon.icon(options), draggable: false })
-		// 		.bindPopup(i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
-		// 			+ i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
-		// 	)
-		// Beautify marker end
-
-			// normal marker start
-			// networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({html: "<i>" + i.name.split('.')[1] + "</i>", className: 'netwerkDivIcon'})})
-            //     .bindPopup(i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
-			// 				+ i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
-			// 	) //i.coordinateArr + ")")
-
             networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({
                         html: "<i>" + i.name.split('.')[1] + "</i>",
                         className: 'netwerkDivIcon',
@@ -327,27 +301,8 @@
                     i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
                                 + i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")"
                 )
-			// normal marker end
-            // function in outer scope
-                .on('click', updateMyFietsrouteLayer("netwerken", i, n))
-            // function in inner scope
-                // .on('click', function () {
-                //     var iC = i;
-                //     // var netwerkC = networkLayerGroup; 
-                //     var visible = false;
-                //     var layer;
-                //     return function () {
-                //         // Toggle line selection
-                //         if (!visible) {
-                //             myFietsrouteLayer.addLayer(layer = L.polyline(iC.coordinateArr, {color: 'yellow'}));
-                //         } else {
-                //             myFietsrouteLayer.removeLayer(myFietsrouteLayer.getLayerId(layer));
-                //         };
-                //         visible = !visible;
-                // }}() )
+                .on('click', updateMyFietsrouteLayer("netwerken", n,  L.polyline(i.coordinateArr, {color: 'orange'})))
             );
-            // networkLayerGroup.addLayer(L.polyline(i.coordinateArr, {color: 'red'})); 
-        // netwerkMarkers.push(L.polyline(i.coordinateArr, {color: 'red'}).on('click', function(e){console.log(e);}));
 		}
 		return networkLayerGroup;
 	}
@@ -528,9 +483,9 @@
         console.log(myFietsroute);
         var txt = "";
         for (var i = 0; i < myFietsroute.length; i++) {
-            if (myFietsroute[i].type == "k") {
+            if (myFietsroute[i].type == "knooppunt") {
                 txt += "K: " + knooppunten[myFietsroute[i].index].nr;
-            } else { // (myFietsroute[i] == "n")
+            } else { // (myFietsroute[i] == "netwerken")
                 txt += "N: " + netwerken[myFietsroute[i].index].name;
             }
             txt += " - ";
