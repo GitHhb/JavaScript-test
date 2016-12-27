@@ -19,13 +19,16 @@
 	<script src="BeautifyMarker/leaflet-beautify-marker-icon.js"></script>
 	<script src="BeautifyMarker/leaflet-beautify-marker.js"></script>
 
+    <!--My code-->
+    <script src="generic-functions.js"></script>
+    <script src="typedef.js"></script>
 	
 </head>
 <body>
 
 <div id="mapdata">Loading...</div>
-<div id="message"></div>
 <div id="mapid" style="width: 1200px; height: 800px;"></div>
+<div id="message"></div>
 <button id="toon-mijn-route" onclick="toonMijnRoute()">Toon route</button>
 <div id="mijn-route">Nog geen route gedefinieerd</div>
 
@@ -42,61 +45,9 @@
     // consecutive array elements must have matching coordinates  
     var myFietsroute = []; // Array of MyFietsrouteType
 
-
-    // Knooppunten
-    // Data obtained from layer "knooppunten" 
-	// Knooppunt type delcaration
-	function KnooppuntType (nr, point, xLng, yLat) {
-		this.nr = nr;
-        this.point = point; // type L.latLng
-	}
-
-    // Netwerk onderdelen
-    // Data obtained from layer "netwerken"
-	// Netwerken type declaration
-	function NetwerkenType (name, point, coordinateArr) {
-		this.name = name;   // network name, | from kml file
-        this.point = point; // type L.latLng, | denotes the network location, from kml file
-		this.coordinateArr = coordinateArr; // Array of L.latLng | coordinates for this route part (polyline), from kml file
-        this.first = null; // index to knooppunten array | knooppunt corresponding to first route coords, coordinateArr[0], computed
-        this.last = null; // index to knooppunten array | knooppunt corresponding to last route coords, coordinateArr[length-1], computed
-	}
-
-    // Netwerk parts from knooppunt to knooppunt
-    // Constructed by us
-    // NeterkK2K type declaration
-    function NetwerkK2K () {
-        this.first = null; // index to knooppunten array | knooppunt corresponding to first route coords, coordinateArr[0], computed
-        this.last = null; // index to knooppunten array | knooppunt corresponding to last route coords, coordinateArr[length-1], computed
-        this.netwerkenArr = []; // Array of indexes to array netwerken 
-    }
-
-    function MyFietsrouteType (type, index) {
-        this.type = type;      // "n" (netwerken) || "k" (knooppunt)
-        // index points to a part of the fietsroute:
-        //   if this.type = "n" => netwerken[this.index]
-        //   if this.type = "k" => knooppunten[this.index] 
-        this.index = index;
-    }
-
-	// construct a new NetwerkenType object from a string of coordinates as returned in a kml file
-	// return: new NetwerkenType object
-	var stringToNetwerkenType = function (name, coordinateString) {
-		var coordinateArr = [];
-
-		return new NetwerkenType(name, coordinateArr);
-	}
-
     var messageTag = document.getElementById("message");
     function showMessage(message) {
         messageTag.innerHTML = message;
-    }
-
-    // Compare coordinates
-    // Args: c1, c2 of type L.latLng
-    // return: true | false
-    function compareCoord(c1, c2) {
-        return (c1.lat === c2.lat && c1.lng === c2.lng);
     }
 
 	// Args: layerName = "knooppunten" | "netwerken"
@@ -204,6 +155,7 @@
 
     // Args: type = "knooppunt" | "netwerken"
     // layer: any layer type, f.e.: L.polyline or L.marker
+    // Return: updated fietsroute or user message with reason that update is not possible 
     var updateMyFietsrouteLayer = function (type, index, layer) {
         var selected = false;
         // var layer;
@@ -221,19 +173,24 @@
                     }
                 } else {
                     // Check if coords match
-                    if (type == "knooppunt") {
-                        if (!compareCoord(myFietsroute[myFietsroute.length - 1], knooppunten[index].nr)) {
-                            showMessage("Knooppunt sluit niet aan route aan.");
-                            return;
-                        }
-                    } else { // type = "netwerken"
-                        if (!compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[0])
-                            && !compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[netwerken[index].coordinateArr.length - 1])
-                        ) {
-                            showMessage("Netwerk sluit niet aan route aan.");
-                            return;
-                        }
+                    if (! myFietsroute.last.fitsOn(type, index) {
+                        showMessage("Knooppunt of netwerk sluit niet aan bij bestaande route");
                     }
+                    // if (type == "knooppunt") {
+                    //     if (! myFietsroute.last.fitsOn(knooppunten[index]) {
+                    //         // !compareCoord(myFietsroute[myFietsroute.length - 1], knooppunten[index].nr)) {
+                    //         showMessage("Knooppunt sluit niet aan route aan.");
+                    //         return;
+                    //     }
+                    // } else { // type = "netwerken"
+                    //     if (! myFietsroute.last.fitsOn(netwerken)) {}
+                    //         // (!compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[0])
+                    //         && !compareCoord(myFietsroute[myFietsroute.length - 1], netwerken[index].coordinateArr[netwerken[index].coordinateArr.length - 1])
+                    //     ) {
+                    //         showMessage("Netwerk sluit niet aan route aan.");
+                    //         return;
+                    //     }
+                    // }
                 }
                 myFietsrouteLayer.addLayer(layer);
                 myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
