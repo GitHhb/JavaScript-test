@@ -173,7 +173,7 @@
                     }
                 } else {
                     // Check if coords match
-                    if (! myFietsroute.last.fitsOn(type, index) {
+                    if (! myFietsroute.last().fitsOn(type, index)) {
                         showMessage("Knooppunt of netwerk sluit niet aan bij bestaande route");
                     }
                     // if (type == "knooppunt") {
@@ -192,6 +192,7 @@
                     //     }
                     // }
                 }
+                myFietsroute.add(new MyFietsrouteType(type, index));
                 myFietsrouteLayer.addLayer(layer);
                 myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
                 console.log("PUSHED index: " + myFietsrouteIndex);

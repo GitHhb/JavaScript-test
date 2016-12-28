@@ -1,12 +1,14 @@
  // Return last element of an Array
     // Convenience function to keep code short
-    var Array.prototype.last = function () {
+    Array.prototype.last = function () {
         return this[this.length-1];
     }
+    Object.defineProperty(Array.prototype, 'last', {enumerable: false});
 
-    var Array.prototype.first = function () {
+    Array.prototype.first = function () {
         return this[0];
     }
+    Object.defineProperty(Array.prototype, 'first', {enumerable: false});
 
     // Compare coordinates
     // Args: c1, c2 of type L.latLng
