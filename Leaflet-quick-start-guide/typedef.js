@@ -1,7 +1,8 @@
     // Knooppunten
     // Data obtained from layer "knooppunten" 
 	// Knooppunt type delcaration
-	function KnooppuntType (nr, point) {
+	function KnooppuntType (name, nr, point) {
+        this.name = name; // official knooppunt name according to Placemark id attribute
 		this.nr = nr;
         this.point = point; // type L.latLng
 	}
@@ -42,59 +43,117 @@
         //   if this.type = "knooppunt" => knooppunten[this.index] 
         this.index = index;
     }
+    function FietsrouteElement (type, index, layer) {
+        this.type = type;      // "netwerken" || "knooppunt"
+        // index points to a part of the fietsroute:
+        //   if this.type = "netwerken" => netwerken[this.index]
+        //   if this.type = "knooppunt" => knooppunten[this.index] 
+        this.index = index;
+        this.layer = layer; // Leaflet layer element corresponding with thiw netwerken or knooppunt element 
+    }
 
-    // Check whether a route part fits, that is whether coordinates match
-    // Args: newType = "knooppunt" | "netwerken"
-    //       newIndex = number
-    //       this =  MyFietsrouteType
-    // Return: "true" | "false"
-    MyFietsrouteType.prototype.fitsOn = function (newType, newIndex) {
-        if (newType === "knooppunt") {
-            if (this.type == "knooppunt") {
-                // This situation should not occur
-                return compareCoord(knooppunten[this.index].point, knooppunten[newIndex].point);
-            } else { // this.type == "netwerken")
-                return netwerken[this.index].matchCoord(knooppunten[newIndex].point)
-            }
-        } else { // newType === "netwerken"
-            if (this.type == "knooppunt") {
-                return netwerken[newIndex].matchCoord(knooppunten[this.index].point);
-            } else { // this.type == "netwerken"
-                return netwerken[this.index].matchCoord(netwerken[newIndex].first())
-                || netwerken[this.index].matchCoord(netwerken[newIndex].last());
-            }
-        }
-        // this point should never be reached
-        console.log("ERROR in method MyFietsrouteType.prototype.fitsOn: unknown arguments");
-    } 
-
-    // Add a new element to the fietsroute, only if the coords of the last element match with those of the new element
-    // Arg: part : of type KnooppuntType | NetwerkenType
-    // Return: if added "OK" else message with denial reason
-    MyFietsrouteType.prototype.add = function (element) {
+    FietsrouteElement.prototype.matches = function (newElement) {
         var canAdd = false;
+        var lastElement = this;
+        if (lastElement.type == "knooppunt" && newElement.type == "knooppunt") {
+            console.log("MATCH" + 1);
+            canAdd = compareCoord(knooppunten[lastElement.index].point, knooppunten[newElement.index].point);
+        } else if (lastElement.type == "netwerken" && newElement.type == "netwerken") {
+            console.log("MATCH" + 2);
+            canAdd = netwerken[lastElement.index].matchCoord(netwerken[newElement.index].coordinateArr.first())
+            || netwerken[lastElement.index].matchCoord(netwerken[newElement.index].coordinateArr.last());
+        } else if (lastElement.type == "knooppunt" && newElement.type == "netwerken") {
+            console.log("MATCH" + 3);
+            canAdd = netwerken[newElement.index].matchCoord(knooppunten[lastElement.index].point);
+        } else { //if (lastElement.type == "netwerken" && newElement.type == "knooppunt") {
+            console.log("MATCH" + 4);
+            canAdd = netwerken[lastElement.index].matchCoord(knooppunten[newElement.index].point);
+        }
+        return canAdd;
+    }
+
+    function FietsrouteType () {
+        this.fietsroute = []; // Array of MyFietsrouteElement
+        this.statusMessage; // String with status info of performed operation
+    }
+
+    // Add a new MyFietsrouteType element to the fietsroute, only if the coords of the last element match with those of the new element
+    // Arg: part : of type KnooppuntType | NetwerkenType
+    // Return: if is added "new length of array" else "-1"
+    FietsrouteType.prototype.add = function (type, index, layer) {
+        var canAdd = false;
+        var newElement = new FietsrouteElement(type, index, layer);
         // A fietsroute must start with a "knooppunt"
-        if (this.length == 0) {
-            if (element.type != "knooppunt") {
-                return "Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.";
-            } else { // A knooppunt as first element is OK
+        if (this.fietsroute.length == 0) {
+            if (type == "knooppunt") {
+                // A knooppunt as first element is OK
+                this.statusMessage = "Start knooppunt toegevoegd."
                 canAdd = true;
+            } else {
+                this.statusMessage = "Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.";
+                return -1;
             }
+        } else { // length > 0 => check if coords of last element of fietsrouteArr match with "this"
+            canAdd = this.fietsroute.last().matches(newElement);
+          
+            // if (this.fietsroute.last().type == "knooppunt" && type == "knooppunt") {
+            //     console.log("MATCH" + 1);
+            //     canAdd = compareCoord(knooppunten[this.fietsroute.last().index].point, knooppunten[index].point);
+            // } else if (this.type == "netwerken" && fietsrouteArr.last().type == "netwerken") {
+            //     console.log("MATCH" + 2);
+            //     canAdd = netwerken[this.index].matchCoord(netwerken[fietsrouteArr.last().index].coordinateArr.first())
+            //     || netwerken[this.index].matchCoord(netwerken[fietsrouteArr.last().index].coordinateArr.last());
+            // } else if (this.type == "knooppunt" && fietsrouteArr.last().type == "netwerken") {
+            //     console.log("MATCH" + 3);
+            //     canAdd = netwerken[fietsrouteArr.last().index].matchCoord(knooppunten[this.index].point);
+            // } else { //if (this.type == "netwerken" && element.type == "knooppunt") {
+            //     console.log("MATCH" + 4);
+            //     canAdd = netwerken[this.index].matchCoord(knooppunten[fietsrouteArr.last().index].point);
+            // }
         }
-        // length > 0 => check if route element has matching coords
-        if (this.type == "knooppunt" && element.type == "knooppunt") {
-            canAdd = compareCoord(knooppunten[this.index].point, knooppunten[element.index].point);
-        } else if (this.type == "netwerken" && element.type == "netwerken") {
-            canAdd = netwerken[this.index].matchCoord(netwerken[element.index].coordinateArr.first())
-            || netwerken[this.index].matchCoord(netwerken[element.index].coordinateArr.last());
-        } else if (this.type == "knooppunt" && element.type == "netwerken") {
-            canAdd = netwerken[element.index].matchCoord(knooppunten[this.index].point);
-        } else { //if (this.type == "netwerken" && element.type == "knooppunt") {
-            canAdd = netwerken[this.index].matchCoord(knooppunten[element.index].point);
-        }
-        this.push(element);
-        return "OK";
+        if (canAdd) return this.fietsroute.push(newElement);
+        else return -1;
 
         // this point should never be reached
         // console.log("ERROR in method MyFietsrouteType.prototype.fitsOn: unknown arguments");
     }
+
+    FietsrouteType.prototype.delete = function (fietsrouteArr) {
+    }
+  
+  
+    // // Add a new MyFietsrouteType element to the fietsroute, only if the coords of the last element match with those of the new element
+    // // Arg: part : of type KnooppuntType | NetwerkenType
+    // // Return: if is added "new length of array" else "-1"
+    // MyFietsrouteType.prototype.add = function (fietsrouteArr) {
+    //     var canAdd = false;
+    //     // A fietsroute must start with a "knooppunt"
+    //     if (fietsrouteArr.length == 0) {
+    //         if (this.type != "knooppunt") {
+    //             //return "Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.";
+    //             return -1;
+    //         } else { // A knooppunt as first element is OK
+    //             canAdd = true;
+    //         }
+    //     } else { // length > 0 => check if coords of last element of fietsrouteArr match with "this"
+    //         if (this.type == "knooppunt" && fietsrouteArr.last().type == "knooppunt") {
+    //             console.log("MATCH" + 1);
+    //             canAdd = compareCoord(knooppunten[this.index].point, knooppunten[fietsrouteArr.last().index].point);
+    //         } else if (this.type == "netwerken" && fietsrouteArr.last().type == "netwerken") {
+    //             console.log("MATCH" + 2);
+    //             canAdd = netwerken[this.index].matchCoord(netwerken[fietsrouteArr.last().index].coordinateArr.first())
+    //             || netwerken[this.index].matchCoord(netwerken[fietsrouteArr.last().index].coordinateArr.last());
+    //         } else if (this.type == "knooppunt" && fietsrouteArr.last().type == "netwerken") {
+    //             console.log("MATCH" + 3);
+    //             canAdd = netwerken[fietsrouteArr.last().index].matchCoord(knooppunten[this.index].point);
+    //         } else { //if (this.type == "netwerken" && element.type == "knooppunt") {
+    //             console.log("MATCH" + 4);
+    //             canAdd = netwerken[this.index].matchCoord(knooppunten[fietsrouteArr.last().index].point);
+    //         }
+    //     }
+    //     if (canAdd) return fietsrouteArr.push(this);
+    //     else return -1;
+
+    //     // this point should never be reached
+    //     // console.log("ERROR in method MyFietsrouteType.prototype.fitsOn: unknown arguments");
+    // }

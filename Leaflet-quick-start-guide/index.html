@@ -43,7 +43,8 @@
     var netwerkK2K = []; // Array of type NetwerkK2K
     // myFietsroute contains the fietsroute parts
     // consecutive array elements must have matching coordinates  
-    var myFietsroute = []; // Array of MyFietsrouteType
+    // var myFietsroute = []; // Array of MyFietsrouteType
+    var myFietsroute = new FietsrouteType; // Array of MyFietsrouteType
 
     var messageTag = document.getElementById("message");
     function showMessage(message) {
@@ -107,12 +108,13 @@
         // A knooppunt section is marked by the "Placemark" tag
         var x = xmlDoc.getElementsByTagName("Placemark");
         for (var i = 0; i < x.length; i++) {
+            var name = x[i].getAttribute("id");
             // Tag "name" marks the knooppuntnr
             var knptNr = x[i].getElementsByTagName("name")[0].innerHTML;
             // Tag "coordinates" marks the coordinates
             var knptArr = x[i].getElementsByTagName("coordinates")[0].innerHTML.split(',');
             var pointCoord = L.latLng(knptArr[1], knptArr[0]);
-            knooppunten.push(new KnooppuntType(knptNr, pointCoord));
+            knooppunten.push(new KnooppuntType(name, knptNr, pointCoord));
             // console.log(knptCoords[1] + ", " + knptCoords[0]);
         }
         // var mydoc = document.getElementById("mapdata");
@@ -165,17 +167,17 @@
             // console.log(layer, e._leaflet_id);
             if (!selected) {
                 // add fietsroute element if adjacent to existing fietsroute
-                if (myFietsroute.length == 0) {
-                    // Only selection of knooppunt allowed
-                    if (type != "knooppunt") {
-                        showMessage("Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.");
-                        return;
-                    }
-                } else {
-                    // Check if coords match
-                    if (! myFietsroute.last().fitsOn(type, index)) {
-                        showMessage("Knooppunt of netwerk sluit niet aan bij bestaande route");
-                    }
+                // if (myFietsroute.length == 0) {
+                //     // Only selection of knooppunt allowed
+                //     if (type != "knooppunt") {
+                //         showMessage("Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.");
+                //         return;
+                //     }
+                // } else {
+                //     // Check if coords match
+                //     if (! myFietsroute.last().fitsOn(type, index)) {
+                //         showMessage("Knooppunt of netwerk sluit niet aan bij bestaande route");
+                //     }
                     // if (type == "knooppunt") {
                     //     if (! myFietsroute.last.fitsOn(knooppunten[index]) {
                     //         // !compareCoord(myFietsroute[myFietsroute.length - 1], knooppunten[index].nr)) {
@@ -191,18 +193,23 @@
                     //         return;
                     //     }
                     // }
+                // }
+                var len;
+                if ( (len = myFietsroute.add(type, index, layer)) > 0 ) { 
+                    myFietsrouteLayer.addLayer(layer);
+                    // myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
+                    console.log("PUSHED index: " + myFietsrouteIndex);
+                    myFietsrouteIndex = len - 1;
+                    selected = true;
                 }
-                myFietsroute.add(new MyFietsrouteType(type, index));
-                myFietsrouteLayer.addLayer(layer);
-                myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
-                console.log("PUSHED index: " + myFietsrouteIndex);
             } else {
                 // remove fietsroute element
                 console.log("REMOVE");
                 myFietsrouteLayer.removeLayer(layer);
-                myFietsroute.splice(myFietsrouteIndex, 1);
+                myFietsroute.fietsroute.splice(myFietsrouteIndex, 1);
+                selected = false;
             };
-            selected = !selected;
+            // selected = !selected;
             showMessage(" ");
             toonMijnRoute();
         }
@@ -230,7 +237,7 @@
                         riseOnHover: true,
                         title: "I'm the title"
                     })})
-				.bindTooltip(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
+				.bindTooltip(i.nr + " " + i.name + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
                     riseOnHover: true,
 					direction: 'top',
 					offset: [-14, -55],
@@ -440,11 +447,11 @@
         // console.log(myFietsrouteLayer.getLayers());
         console.log(myFietsroute);
         var txt = "";
-        for (var i = 0; i < myFietsroute.length; i++) {
-            if (myFietsroute[i].type == "knooppunt") {
-                txt += "K: " + knooppunten[myFietsroute[i].index].nr;
+        for (var i = 0; i < myFietsroute.fietsroute.length; i++) {
+            if (myFietsroute.fietsroute[i].type == "knooppunt") {
+                txt += "K: " + knooppunten[myFietsroute.fietsroute[i].index].nr;
             } else { // (myFietsroute[i] == "netwerken")
-                txt += "N: " + netwerken[myFietsroute[i].index].name;
+                txt += "N: " + netwerken[myFietsroute.fietsroute[i].index].name;
             }
             txt += " - ";
         }
