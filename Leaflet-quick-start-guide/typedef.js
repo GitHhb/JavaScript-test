@@ -75,6 +75,26 @@
     function FietsrouteType () {
         this.fietsroute = []; // Array of MyFietsrouteElement
         this.statusMessage; // String with status info of performed operation
+        this.matchCoords; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
+    }
+
+    FietsrouteType.prototype.matches = function (newElement) {
+        var canAdd = false;
+        var lastElement = this.fietsroute.last();
+        if (newElement.type == "knooppunt") {
+            console.log("MATCH" + 1);
+            canAdd = compareCoord(this.matchCoords, knooppunten[newElement.index].point);
+            // this.matchCoords remains the same, as knooppunt has the same coords as the existing value of this.matchCoords
+        } else { // if (newElement.type == "netwerken") {
+            if ( canAdd = compareCoord(this.matchCoords, netwerken[newElement.index].coordinateArr.first()) ) {
+                console.log("MATCH" + 2);
+                this.matchCoords = netwerken[newElement.index].coordinateArr.last();
+            } else if ( canAdd = compareCoord(this.matchCoords, netwerken[newElement.index].coordinateArr.last()) ) {
+                console.log("MATCH" + 3);
+                this.matchCoords = netwerken[newElement.index].coordinateArr.first();
+            }
+        }
+        return canAdd;
     }
 
     // Add a new MyFietsrouteType element to the fietsroute, only if the coords of the last element match with those of the new element
@@ -88,13 +108,15 @@
             if (type == "knooppunt") {
                 // A knooppunt as first element is OK
                 this.statusMessage = "Start knooppunt toegevoegd."
+                this.matchCoords = knooppunten[index].point;
                 canAdd = true;
             } else {
                 this.statusMessage = "Ongeldige selectie. Selecteer een knooppunt als eerste element van de route.";
                 return -1;
             }
         } else { // length > 0 => check if coords of last element of fietsrouteArr match with "this"
-            canAdd = this.fietsroute.last().matches(newElement);
+            // canAdd = this.fietsroute.last().matches(newElement);
+            canAdd = this.matches(newElement);
           
             // if (this.fietsroute.last().type == "knooppunt" && type == "knooppunt") {
             //     console.log("MATCH" + 1);
