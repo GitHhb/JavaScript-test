@@ -71,6 +71,33 @@
     //     }
     //     return canAdd;
     // }
+    
+    // Check if "this" FietsrouteElement matches with "matchCoords"
+    // Used to check if an element fits onto the existing route and compute the new coords to which the next element should fit
+    // Arg: element: of type FietsrouteElement, new element to be checked
+    // Return:  canAdd: boolean, indicating whether adding is possible
+    //          newCoords: L.latlng, if canAdd and element is added then new value for this.matchCoords   
+    FietsrouteElement.prototype.matches = function (matchCoords) {
+        var canAdd = false;
+        var newCoords = L.latLng(0, 0);
+        // var lastElement = this;
+        var element = this;
+        if (element.type == "knooppunt") {
+            console.log("MATCH" + 1);
+            canAdd = compareCoord(matchCoords, knooppunten[element.index].point);
+            // matchCoords remains the same, as knooppunt has the same coords as the existing value of this.matchCoords
+            newCoords = matchCoords;
+        } else { // if (element.type == "netwerken") {
+            if ( canAdd = compareCoord(matchCoords, netwerken[element.index].coordinateArr.first()) ) {
+                console.log("MATCH" + 2);
+                newCoords = netwerken[element.index].coordinateArr.last();
+            } else if ( canAdd = compareCoord(matchCoords, netwerken[element.index].coordinateArr.last()) ) {
+                console.log("MATCH" + 3);
+                newCoords = netwerken[element.index].coordinateArr.first();
+            }
+        }
+        return {canAdd: canAdd, newCoords: newCoords};
+    }
 
     function FietsrouteType () {
         this.fietsroute = []; // Array of MyFietsrouteElement
@@ -78,48 +105,66 @@
         this.matchCoords; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
     }
 
+    // Check if an element fits onto the existing route and compute the new coords to which the next element should fit
+    // Arg: element: of type FietsrouteElement, new element to be checked
+    // Return:  canAdd: boolean, indicating whether adding is possible
+    //          newCoords: L.latlng, if canAdd and element is added then new value for this.matchCoords   
     FietsrouteType.prototype.matches = function (newElement) {
         var canAdd = false;
+        var newCoords = L.latLng(0, 0);
         var lastElement = this.fietsroute.last();
         if (newElement.type == "knooppunt") {
             console.log("MATCH" + 1);
             canAdd = compareCoord(this.matchCoords, knooppunten[newElement.index].point);
             // this.matchCoords remains the same, as knooppunt has the same coords as the existing value of this.matchCoords
+            newCoords = this.matchCoords;
         } else { // if (newElement.type == "netwerken") {
             if ( canAdd = compareCoord(this.matchCoords, netwerken[newElement.index].coordinateArr.first()) ) {
                 console.log("MATCH" + 2);
-                this.matchCoords = netwerken[newElement.index].coordinateArr.last();
+                newCoords = netwerken[newElement.index].coordinateArr.last();
             } else if ( canAdd = compareCoord(this.matchCoords, netwerken[newElement.index].coordinateArr.last()) ) {
                 console.log("MATCH" + 3);
-                this.matchCoords = netwerken[newElement.index].coordinateArr.first();
+                newCoords = netwerken[newElement.index].coordinateArr.first();
             }
         }
-        return canAdd;
+        return {canAdd: canAdd, newCoords: newCoords};
     }
 
     // Add a new MyFietsrouteElement element to the fietsroute, only if the coords of the last element match with those of the new element
     // Arg: part : of type KnooppuntType | NetwerkenType
     // Return: if is added "new length of array" else "-1"
     FietsrouteType.prototype.add = function (type, index, layer) {
+        var returnVal;
         var canAdd = false;
+        var newMatchCoords;
         var newElement = new FietsrouteElement(type, index, layer);
+        this.statusMessage = " ";
         // A fietsroute must start with a "knooppunt"
         if (this.fietsroute.length == 0) {
             if (type == "knooppunt") {
                 // A knooppunt as first element is OK
                 this.statusMessage = "Start knooppunt toegevoegd."
-                this.matchCoords = knooppunten[index].point;
+                newMatchCoords = knooppunten[index].point;
                 canAdd = true;
-            } else {
-                this.statusMessage = "Startpunt van de route is een knooppunt. Selecteer een knooppunt als eerste element van de route.";
+            } else { // first element not a knooppunt
+                this.statusMessage = "Selecteer een knooppunt als startpunt van de route.";
                 return -1;
             }
-        } else { // length > 0 => check if coords of last element of fietsrouteArr match with "this"
-            // canAdd = this.fietsroute.last().matches(newElement);
-            canAdd = this.matches(newElement);
+        } else { // length > 0 => check if coords of last element of fietsrouteArr match with "this.matchCoords"
+            // canAdd = this.fietsroute.last().matches(this.fietsroute.last(). newElement);
+            returnVal = newElement.matches(this.matchCoords);
+            // returnVal = this.matches(newElement);
+            canAdd = returnVal.canAdd;
+            newMatchCoords = returnVal.newCoords;
         }
-        if (canAdd) return this.fietsroute.push(newElement);
-        else return -1;
+        if (canAdd) {
+            this.matchCoords = newMatchCoords;
+            return this.fietsroute.push(newElement);
+        }
+        else {
+            this.statusMessage = "Selecteer een knooppunt of netwerkdeel dat aan de bestaande route aansluit";
+            return -1;
+        }
 
         // this point should never be reached
         // console.log("ERROR in method MyFietsrouteType.prototype.fitsOn: unknown arguments");
@@ -128,7 +173,10 @@
     // Remove last FietsrouteElement from the fietsroute array
     FietsrouteType.prototype.delete = function () {
         // update this.matchCoords
-        
+        // compute this.matchCoords, now last element of fietsroute is the new element to match
+        var returnVal = this.fietsroute.last().matches(this.matchCoords);
+        this.matchCoords = returnVal.newCoords;
+        // remove last element from fietsroute
         this.fietsroute.pop();
     }
   
