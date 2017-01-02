@@ -19,7 +19,7 @@
 	// Args: layerName = "knooppunten" | "netwerken"
 	//		 map = baseMap handle
 	//		 layerControl = control handle
-	function getKnooppunten (layerName, map, layerControl) {
+	function initFietsrouteData (layerName, map, layerControl) {
 		var mapURL = `
 			http://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/wms
 			?FORMAT=kml
@@ -132,8 +132,9 @@
             // console.log(layer, e._leaflet_id);
             if (!selected) {
                 var len;
-                if ( (len = myFietsroute.add(type, index, layer)) > 0 ) { 
+                if ( (len = myFietsroute.add(type, index, this)) > 0 ) { 
                     myFietsrouteLayer.addLayer(layer);
+                    console.log("THS", this);
                     // myFietsrouteIndex = myFietsroute.push(new MyFietsrouteType(type, index)) - 1;
                     myFietsrouteIndex = len - 1;
                     console.log("PUSHED index: " + myFietsrouteIndex);
@@ -141,13 +142,17 @@
                 }
             } else {
                 // remove fietsroute element
-                console.log("REMOVE");
-                myFietsrouteLayer.removeLayer(layer);
-                myFietsroute.fietsroute.splice(myFietsrouteIndex, 1);
+                console.log("REMOVE index: " + myFietsrouteIndex);
+                if (myFietsrouteIndex < myFietsroute.fietsroute.length-1) {
+                    myFietsroute.fietsroute[myFietsrouteIndex + 1].layer.fire('click');
+                }
+                    myFietsrouteLayer.removeLayer(layer);
+                    myFietsroute.delete();
+                    // myFietsroute.fietsroute.splice(myFietsrouteIndex, 1);
                 selected = false;
             };
             // selected = !selected;
-            showMessage(" ");
+            showMessage(myFietsroute.statusMessage);
             toonMijnRoute();
         }
     }
@@ -367,11 +372,11 @@
 
 	var mycontrol = L.control.layers(baseMaps, overlayMaps).addTo(mymap);
 	// L.layerGroup([L.marker([51.49728786029085, 4.284883498524014]).bindPopup("nieuw")]).addLayer(knooppuntLayer).addTo(mymap);
-	getKnooppunten("knooppunten", mymap, mycontrol);
-	getKnooppunten("netwerken", mymap, mycontrol);
+	initFietsrouteData("knooppunten", mymap, mycontrol);
+	initFietsrouteData("netwerken", mymap, mycontrol);
 	// console.log(xtd);
 	// mycontrol.addOverlay(xtd, "2e knooppunten");
-	// mycontrol.addLayer(getKnooppunten(), "knoop");
+	// mycontrol.addLayer(initFietsrouteData(), "knoop");
 
     // // Convenience method: show coordinates of map location when map is clicked
 	// function onMapClick(e) {

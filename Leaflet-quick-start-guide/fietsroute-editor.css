@@ -35,6 +35,14 @@
   height:20px;
 }
 
+.selectDivIcon {
+  background: darkorange;
+  border:10px solid rgba(255,0,128,0.5);
+  text-align: left;
+  line-height: 0px;
+  border-radius:50%;
+}
+
 .markerDivIcon {
   background: dodgerblue;
   border:10px solid rgba(255,128,0,0.1);
