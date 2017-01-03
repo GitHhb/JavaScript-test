@@ -1,18 +1,7 @@
-var mymap;
-var mycontrol; // The base layer
-var knooppuntLayer; // pdok marker layer
-// myFietsroute contains the fietsroute parts
-// consecutive array elements must have matching coordinates  
-// var myFietsroute = []; // Array of MyFietsrouteType
-var myFietsroute = new FietsrouteType; // Array of MyFietsrouteType
+var netwerkK2K = []; // Array of type NetwerkK2K
 
 
-var messageTag = document.getElementById("message");
-function showMessage(message) {
-    messageTag.innerHTML = message;
-}
-
-/*var iconOrange = L.icon({
+var iconOrange = L.icon({
     iconUrl: 'Image/marker-icon-orange.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -59,7 +48,7 @@ var updateMyFietsrouteLayer = function (type, index, layer) {
 
 // Create layergroup of knooppunten
 // Arg: knooppunten = array of type Knooppunt
-function knooppuntenLayerGroup (knooppunten) {
+function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
     // create array with knooppunt markers
     var knptMarkers = [];
     for (k in knooppunten) {
@@ -89,12 +78,13 @@ function knooppuntenLayerGroup (knooppunten) {
             .on('click', updateMyFietsrouteLayer("knooppunt", k,  L.marker(i.point, {icon: iconOrange}) ))
             );
     }
-    return L.layerGroup(knptMarkers);
+    knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
+    // return L.layerGroup(knptMarkers);
 }
 
 // Arg: netwerken = array of type NetwerkenType
-function netwerkenLayerGroup (netwerken) {
-    var networkLayerGroup = L.layerGroup();
+function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
+    // var networkLayerGroup = L.layerGroup();
     // create array with knooppunt markers
     var netwerkMarkers = [];
     for (n in netwerken) {
@@ -117,7 +107,7 @@ function netwerkenLayerGroup (netwerken) {
             .on('click', updateMyFietsrouteLayer("netwerken", n,  L.polyline(i.coordinateArr, {color: 'orange'})))
         );
     }
-    return networkLayerGroup;
+    // return networkLayerGroup;
 }
 
 
@@ -209,108 +199,4 @@ function matchEndPoints () {
     // }
     return L.layerGroup(netwerkMarkers);
 }
-*/
 
-// Define map and layers
-
-var baselayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
-    maxZoom: 18,
-    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    id: 'mapbox.streets'
-});
-
-// If initial value of zoom too low then no kml data will be loaded 
-mymap = L.map('mapid', {
-    center: [51.497469, 4.271493],
-    zoom: 12,
-    layers: [baselayer]
-});
-
-// L.marker([51.5, 4.19]).addTo(mymap)
-// 	.bindPopup("<b>Hello world!</b><br />I am a popup."); //.openPopup();
-
-var emptyLayer = L.tileLayer('');
-// knooppuntLayer = L.marker();
-// knooppuntLayer = L.layerGroup([L.marker([51.49728786029085, 4.283883498524014]).bindPopup("hoi")]); //.addLayer(knooppuntLayer);
-// knooppuntLayer = L.marker([51.49728786029085, 4.283883498524014]);
-// knooppuntLayer = L.layerGroup([markerX]);
-
-// officiele knooppunten
-var wmsKnooppuntLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
-    layers: 'knooppunten',
-    format: 'image/png',
-    transparent: true,
-}).addTo(mymap);
-
-// officieel netwerk
-var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
-    layers: 'netwerken',
-    format: 'image/png',
-    transparent: true,
-}).addTo(mymap);
-
-var myFietsrouteLayer = new L.LayerGroup().addTo(mymap); // Layer with all parts for my own fietsroute
-var editKnooppuntenLayer = new L.LayerGroup().addTo(mymap); // Layer to edit knooppunten 
-var editNetwerkLayer = new L.LayerGroup().addTo(mymap); // Layer to edit netwerk
-
-
-var baseMaps = {
-    "Basismap": baselayer,
-    "No maps": emptyLayer
-}
-
-var overlayMaps = {
-    "Officiele Netwerken"   : wmsNetwerkLayer,
-    "Officiele Knooppunten" : wmsKnooppuntLayer,
-    "Mijn Fietsroute"       : myFietsrouteLayer,
-    "Edit knooppunten"      : editKnooppuntenLayer,
-    "Edit netwerken"        : editNetwerkLayer
-    // "Knooppunten": knooppuntLayer
-}
-
-var mycontrol = L.control.layers(baseMaps, overlayMaps).addTo(mymap);
-// L.layerGroup([L.marker([51.49728786029085, 4.284883498524014]).bindPopup("nieuw")]).addLayer(knooppuntLayer).addTo(mymap);
-
-// initFietsrouteData("knooppunten", mymap, mycontrol);
-initFietsrouteData("knooppunten", mymap, editKnooppuntenLayer);
-// initFietsrouteData("netwerken", mymap, mycontrol);
-initFietsrouteData("netwerken", mymap, editNetwerkLayer);
-
-// console.log(xtd);
-// mycontrol.addOverlay(xtd, "2e knooppunten");
-// mycontrol.addLayer(initFietsrouteData(), "knoop");
-
-// // Convenience method: show coordinates of map location when map is clicked
-// function onMapClick(e) {
-// 	L.popup()
-// 		.setLatLng(e.latlng)
-// 		.setContent("Coordinaten:<br>" + e.latlng.toString())
-// 		.openOn(mymap);
-// }
-// mymap.on('click', onMapClick);
-
-// Implement "Toon route" button
-htmlMijnRoute = document.getElementById("mijn-route");
-htmlMijnRoute.innerHTML = "Initializing...";
-
-function toonMijnRoute () {
-    // console.log(myFietsrouteLayer.getLayers());
-    console.log(myFietsroute);
-    var txt = "<table><tr><th>Type</th><th>Id nummer</th></tr>";
-    for (var i = 0; i < myFietsroute.fietsroute.length; i++) {
-        txt += "<tr>";
-        if (myFietsroute.fietsroute[i].type == "knooppunt") {
-            txt += "<td>" + '<img src="Image/marker-icon-orange.png" alt="Knooppunt">' + "K: " + "</td><td>" + knooppunten[myFietsroute.fietsroute[i].index].nr + "</td>";
-        } else { // (myFietsroute[i] == "netwerken")
-            txt += "<td>" + "wegdeel" + "</td><td>" + "N: " + netwerken[myFietsroute.fietsroute[i].index].name.split(".")[1] + "</td>";
-        }
-        txt += "</tr>";
-    }
-    txt += "</table>";
-    // htmlMijnRoute.innerHTML = myFietsrouteLayer.getLayers();
-    htmlMijnRoute.innerHTML = txt;
-}
-
-toonMijnRoute();

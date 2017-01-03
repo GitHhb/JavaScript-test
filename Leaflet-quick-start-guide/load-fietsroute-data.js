@@ -7,15 +7,18 @@ var netwerkenLoaded = false;
 // Args: layerName = "knooppunten" | "netwerken"
 //		 map = baseMap handle
 //		 layerControl = control handle
-function initFietsrouteData (layerName, map, layerControl) {
-    var mapURL = '`http://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/wms';
-    mapURL += '?FORMAT=kml';
-    mapURL += '&TRANSPARENT=TRUE';
-    mapURL += '&SERVICE=WMS';
-    mapURL += '&VERSION=1.1.1';
-    mapURL += '&REQUEST=GetMap';
-    mapURL += '&STYLES=';
-    mapURL += '&WIDTH=1047&HEIGHT=1192';
+// function initFietsrouteData (layerName, map, layerControl, layer) {
+function initFietsrouteData (layerName, map, layer) {
+    var mapURL = "".concat(
+        'http://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/wms',
+        '?FORMAT=kml',
+        '&TRANSPARENT=TRUE',
+        '&SERVICE=WMS',
+        '&VERSION=1.1.1',
+        '&REQUEST=GetMap',
+        '&STYLES=',
+        '&WIDTH=1047&HEIGHT=1192'
+    );
         // ?LAYERS=knooppunten
         // &SRS=EPSG%3A28992
         // &BBOX=77395.905557391,389014.9,79154.865557391,391018.3
@@ -36,13 +39,13 @@ function initFietsrouteData (layerName, map, layerControl) {
             console.log("LOADING all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
             if ( layerName == "knooppunten") {
                 extractKnooppunten(xmlDoc);
-                // layerControl.addOverlay(knooppuntenLayerGroup(knooppunten), "My Knooppunt layer");
-                editKnooppuntenLayer.addLayer(knooppuntenLayerGroup(knooppunten));
+                // editKnooppuntenLayer.addLayer(knooppuntenLayerGroup(knooppunten));
+                addToKnooppuntenLayerGroup(knooppunten, layer);
                 knooppuntenLoaded = true;
             } else { // layerName == "netwerken"
                 extractNetwerken(xmlDoc);
-                // layerControl.addOverlay(netwerkenLayerGroup(netwerken), "My Netwerk layer");
-                editNetwerkLayer.addLayer(netwerkenLayerGroup(netwerken));
+                // editNetwerkLayer.addLayer(netwerkenLayerGroup(netwerken));
+                addToNetwerkenLayerGroup(netwerken, layer);
                 netwerkenLoaded = true;
             }
         }

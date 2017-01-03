@@ -45,10 +45,11 @@
 
 .markerDivIcon {
   background: dodgerblue;
-  border:10px solid rgba(255,128,0,0.1);
+  padding: 5px;
+  border: 5px solid rgba(30, 144, 255,0.9);
   text-align: left;
   line-height: 0px;
-  border-radius:50%;
+  border-radius: 50%;
 }
 
 .netwerkDivIcon {
