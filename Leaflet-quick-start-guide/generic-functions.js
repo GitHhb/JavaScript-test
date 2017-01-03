@@ -23,3 +23,30 @@ function compareCoord(c1, c2) {
     console.log("DISTANCE: ", dist);
     return dist < 50;
 }
+
+function toonMijnRoute (tag) {
+    // console.log(myFietsrouteLayer.getLayers());
+    console.log(myFietsroute);
+    var html = `<table>
+        <tr>
+            <th class="td-fietsroute-type">Type</th>
+            <th>Knooppunt nummer</th>
+            <th>Fietsroute Id</th>
+        </tr>`;
+    for (var i = 0; i < myFietsroute.fietsroute.length; i++) {
+        html += "<tr>";
+        if (myFietsroute.fietsroute[i].type == "knooppunt") {
+            html += '<td class="td-fietsroute-type">' + '<img src="Image/marker-icon-orange.png" alt="Knooppunt">' + "</td>"
+                 + "<td>" + "Knooppunt " + knooppunten[myFietsroute.fietsroute[i].index].nr + "</td>"
+                 + "<td>" + knooppunten[myFietsroute.fietsroute[i].index].name + "</td>";
+        } else { // (myFietsroute[i] == "netwerken")
+            html += '<td class="td-fietsroute-type">' + '<img src="Image/route-element.png" alt="Wegdeel">' + "</td>"
+                 + "<td>" + "wegdeel" + "</td>"
+                 + "<td>" + netwerken[myFietsroute.fietsroute[i].index].name + "</td>";
+        }
+        html += "</tr>";
+    }
+    html += "</table>";
+    // write html to tag
+    tag.innerHTML = html;
+}

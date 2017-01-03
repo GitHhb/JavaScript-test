@@ -29,14 +29,14 @@ function initFietsrouteData (layerName, map, layer) {
     mapURL += layers + crs + bbox; 
 
 
-    console.log(mapURL);
-    console.log(bounds._southWest.lng);
+    // console.log(mapURL);
+    // console.log(bounds._southWest.lng);
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var xmlDoc = this.responseXML;
-            console.log("LOADING all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
+            // console.log("LOADING all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
             if ( layerName == "knooppunten") {
                 extractKnooppunten(xmlDoc);
                 // editKnooppuntenLayer.addLayer(knooppuntenLayerGroup(knooppunten));

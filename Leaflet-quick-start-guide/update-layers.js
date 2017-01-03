@@ -11,6 +11,11 @@ var iconOrange = L.icon({
     shadowAnchor: [22, 94]
 }); 
 
+// var OrangeIcon = L.Icon.Default.extend( {
+//     options: {iconUrl: 'Image/marker-icon-orange.png'}
+// });
+// var iconOrange = new OrangeIcon();
+
 // Args: type = "knooppunt" | "netwerken"
 // layer: any layer type, f.e.: L.polyline or L.marker
 // Return: updated fietsroute or user message with reason that update is not possible 
@@ -26,12 +31,10 @@ var updateMyFietsrouteLayer = function (type, index, layer) {
             if ( (len = myFietsroute.add(type, index, this)) > 0 ) { 
                 myFietsrouteLayer.addLayer(layer);
                 myFietsrouteIndex = len - 1;
-                console.log("PUSHED index: " + myFietsrouteIndex);
                 selected = true;
             }
         } else {
             // remove fietsroute element
-            console.log("REMOVE index: " + myFietsrouteIndex);
             if (myFietsrouteIndex < myFietsroute.fietsroute.length-1) {
                 myFietsroute.fietsroute[myFietsrouteIndex + 1].layer.fire('click');
             }
@@ -42,7 +45,7 @@ var updateMyFietsrouteLayer = function (type, index, layer) {
         };
         // selected = !selected;
         showMessage(myFietsroute.statusMessage);
-        toonMijnRoute();
+        toonMijnRoute(htmlMijnRoute);
     }
 }
 
@@ -62,7 +65,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
             // L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
             L.marker(i.point, {icon: L.divIcon({
                 iconSize: [12, 12],
-                iconAnchor: [16, 60],
+                iconAnchor: [14, 65],
                     html: "<b>" + i.nr + "</b>",
                     className: 'markerDivIcon',
                     riseOnHover: true,
@@ -90,8 +93,9 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
     for (n in netwerken) {
         i = netwerken[n];
         networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({
-                    html: "<i>" + i.name.split('.')[1] + "</i>",
+                    // html: "<i>" + i.name.split('.')[1] + "</i>",
                     className: 'netwerkDivIcon',
+                    iconAnchor: [10, 10],
                     riseOnHover: true,
                     title: "I'm the title",
                     offset: [-5, -5]

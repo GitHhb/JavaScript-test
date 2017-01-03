@@ -254,7 +254,7 @@ var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/f
 var myFietsrouteLayer = new L.LayerGroup().addTo(mymap); // Layer with all parts for my own fietsroute
 var editKnooppuntenLayer = new L.LayerGroup().addTo(mymap); // Layer to edit knooppunten 
 var editNetwerkLayer = new L.LayerGroup().addTo(mymap); // Layer to edit netwerk
-
+editKnooppuntenLayer.setZIndex(800);
 
 var baseMaps = {
     "Basismap": baselayer,
@@ -278,6 +278,10 @@ initFietsrouteData("knooppunten", mymap, editKnooppuntenLayer);
 // initFietsrouteData("netwerken", mymap, mycontrol);
 initFietsrouteData("netwerken", mymap, editNetwerkLayer);
 
+mymap.on('viewreset', function (e) {console.log("View was reset")});
+mymap.on('zoomend', function (e) {console.log("View was zoom ended")});
+mymap.on('move', function (e) {console.log("View was move ended")});
+
 // console.log(xtd);
 // mycontrol.addOverlay(xtd, "2e knooppunten");
 // mycontrol.addLayer(initFietsrouteData(), "knoop");
@@ -295,22 +299,31 @@ initFietsrouteData("netwerken", mymap, editNetwerkLayer);
 htmlMijnRoute = document.getElementById("mijn-route");
 htmlMijnRoute.innerHTML = "Initializing...";
 
-function toonMijnRoute () {
-    // console.log(myFietsrouteLayer.getLayers());
-    console.log(myFietsroute);
-    var txt = "<table><tr><th>Type</th><th>Id nummer</th></tr>";
-    for (var i = 0; i < myFietsroute.fietsroute.length; i++) {
-        txt += "<tr>";
-        if (myFietsroute.fietsroute[i].type == "knooppunt") {
-            txt += "<td>" + '<img src="Image/marker-icon-orange.png" alt="Knooppunt">' + "K: " + "</td><td>" + knooppunten[myFietsroute.fietsroute[i].index].nr + "</td>";
-        } else { // (myFietsroute[i] == "netwerken")
-            txt += "<td>" + "wegdeel" + "</td><td>" + "N: " + netwerken[myFietsroute.fietsroute[i].index].name.split(".")[1] + "</td>";
-        }
-        txt += "</tr>";
-    }
-    txt += "</table>";
-    // htmlMijnRoute.innerHTML = myFietsrouteLayer.getLayers();
-    htmlMijnRoute.innerHTML = txt;
-}
+// function toonMijnRoute (tag) {
+//     // console.log(myFietsrouteLayer.getLayers());
+//     console.log(myFietsroute);
+//     var html = `<table>
+//         <tr>
+//             <th class="td-fietsroute-type">Type</th>
+//             <th>Knooppunt nummer</th>
+//             <th>Fietsroute Id</th>
+//         </tr>`;
+//     for (var i = 0; i < myFietsroute.fietsroute.length; i++) {
+//         html += "<tr>";
+//         if (myFietsroute.fietsroute[i].type == "knooppunt") {
+//             html += '<td class="td-fietsroute-type">' + '<img src="Image/marker-icon-orange.png" alt="Knooppunt">' + "</td>"
+//                  + "<td>" + "Knooppunt " + knooppunten[myFietsroute.fietsroute[i].index].nr + "</td>"
+//                  + "<td>" + knooppunten[myFietsroute.fietsroute[i].index].name + "</td>";
+//         } else { // (myFietsroute[i] == "netwerken")
+//             html += '<td class="td-fietsroute-type">' + '<img src="Image/route-element.png" alt="Wegdeel">' + "</td>"
+//                  + "<td>" + "wegdeel" + "</td>"
+//                  + "<td>" + netwerken[myFietsroute.fietsroute[i].index].name + "</td>";
+//         }
+//         html += "</tr>";
+//     }
+//     html += "</table>";
+//     // write html to tag
+//     tag.innerHTML = html;
+// }
 
-toonMijnRoute();
+toonMijnRoute(htmlMijnRoute);
