@@ -38,11 +38,15 @@ function initFietsrouteData (layerName, map, layer) {
             var xmlDoc = this.responseXML;
             // console.log("LOADING all", Boolean(netwerkenLoaded), Boolean(knooppuntenLoaded));
             if ( layerName == "knooppunten") {
+                knooppunten = [];
+                layer.clearLayers();
                 extractKnooppunten(xmlDoc);
                 // editKnooppuntenLayer.addLayer(knooppuntenLayerGroup(knooppunten));
                 addToKnooppuntenLayerGroup(knooppunten, layer);
                 knooppuntenLoaded = true;
             } else { // layerName == "netwerken"
+                netwerken = [];
+                layer.clearLayers();
                 extractNetwerken(xmlDoc);
                 // editNetwerkLayer.addLayer(netwerkenLayerGroup(netwerken));
                 addToNetwerkenLayerGroup(netwerken, layer);
@@ -56,6 +60,10 @@ function initFietsrouteData (layerName, map, layer) {
 
 function extractKnooppunten (xmlDoc) {
     // A knooppunt section is marked by the "Placemark" tag
+    // if (knooppunten.length > 0) {
+    //     console.log("Not re-evaluating knooppunten");
+    //     return;
+    // }
     var x = xmlDoc.getElementsByTagName("Placemark");
     for (var i = 0; i < x.length; i++) {
         var name = x[i].getAttribute("id");

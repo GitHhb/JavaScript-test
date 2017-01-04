@@ -18,11 +18,16 @@ if (! Array.prototype.first) {
 // Args: c1, c2 of type L.latLng
 // return: true | false
 function compareCoord(c1, c2) {
-    // return (c1.lat === c2.lat && c1.lng === c2.lng);
+    // return c1.equals(c2);
     var dist = c1.distanceTo(c2);
     console.log("DISTANCE: ", dist);
     return dist < 50;
 }
+
+// var messageTag = document.getElementById("message");
+// function showMessage(message) {
+//     messageTag.innerHTML = message;
+// }
 
 function toonMijnRoute (tag) {
     // console.log(myFietsrouteLayer.getLayers());
@@ -37,12 +42,12 @@ function toonMijnRoute (tag) {
         html += "<tr>";
         if (myFietsroute.fietsroute[i].type == "knooppunt") {
             html += '<td class="td-fietsroute-type">' + '<img src="Image/marker-icon-orange.png" alt="Knooppunt">' + "</td>"
-                 + "<td>" + "Knooppunt " + knooppunten[myFietsroute.fietsroute[i].index].nr + "</td>"
-                 + "<td>" + knooppunten[myFietsroute.fietsroute[i].index].name + "</td>";
+                 + "<td>" + "Knooppunt " + myFietsroute.fietsroute[i].element.nr + "</td>"
+                 + "<td>" + myFietsroute.fietsroute[i].element.name + "</td>";
         } else { // (myFietsroute[i] == "netwerken")
             html += '<td class="td-fietsroute-type">' + '<img src="Image/route-element.png" alt="Wegdeel">' + "</td>"
-                 + "<td>" + "wegdeel" + "</td>"
-                 + "<td>" + netwerken[myFietsroute.fietsroute[i].index].name + "</td>";
+                 + "<td>" + "Wegdeel" + "</td>"
+                 + "<td>" + myFietsroute.fietsroute[i].element.name + "</td>";
         }
         html += "</tr>";
     }

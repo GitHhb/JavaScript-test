@@ -19,7 +19,7 @@ var iconOrange = L.icon({
 // Args: type = "knooppunt" | "netwerken"
 // layer: any layer type, f.e.: L.polyline or L.marker
 // Return: updated fietsroute or user message with reason that update is not possible 
-var updateMyFietsrouteLayer = function (type, index, layer) {
+var updateMyFietsrouteLayer = function (type, element, layer) {
     var selected = false;
     // var layer;
     var myFietsrouteIndex;
@@ -28,7 +28,7 @@ var updateMyFietsrouteLayer = function (type, index, layer) {
         // console.log(layer, e._leaflet_id);
         if (!selected) {
             var len;
-            if ( (len = myFietsroute.add(type, index, this)) > 0 ) { 
+            if ( (len = myFietsroute.add(type, element, this)) > 0 ) { 
                 myFietsrouteLayer.addLayer(layer);
                 myFietsrouteIndex = len - 1;
                 selected = true;
@@ -78,7 +78,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                 offset: [-14, -55],
                 className: 'markerTooltip'
             })
-            .on('click', updateMyFietsrouteLayer("knooppunt", k,  L.marker(i.point, {icon: iconOrange}) ))
+            .on('click', updateMyFietsrouteLayer("knooppunt", i,  L.marker(i.point, {icon: iconOrange}) ))
             );
     }
     knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
@@ -108,7 +108,7 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
                     offset: [5, -5]
                 }
             )
-            .on('click', updateMyFietsrouteLayer("netwerken", n,  L.polyline(i.coordinateArr, {color: 'orange'})))
+            .on('click', updateMyFietsrouteLayer("netwerken", i,  L.polyline(i.coordinateArr, {color: 'orange'})))
         );
     }
     // return networkLayerGroup;
