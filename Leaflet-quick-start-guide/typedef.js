@@ -2,7 +2,7 @@
 // Data obtained from layer "knooppunten" 
 // Knooppunt type delcaration
 function KnooppuntType (name, nr, point) {
-    this.name = name; // official knooppunt name according to Placemark id attribute
+    this.name = name; // knooppunt name | according to Placemark id attribute
     this.nr = nr;
     this.point = point; // type L.latLng
 }
@@ -12,7 +12,7 @@ function KnooppuntType (name, nr, point) {
 // Data obtained from layer "netwerken"
 // Netwerken type declaration
 function NetwerkenType (name, point, coordinateArr) {
-    this.name = name;   // network name, | from kml file
+    this.name = name;   // network name | from kml file
     this.point = point; // type L.latLng, | denotes the network location, from kml file
     this.coordinateArr = coordinateArr; // Array of L.latLng | coordinates for this route part (polyline), from kml file
     this.first = null; // index to knooppunten array | knooppunt corresponding to first route coords, coordinateArr[0], computed

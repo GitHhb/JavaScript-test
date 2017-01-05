@@ -55,7 +55,6 @@ var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/f
 var editKnooppuntenLayer = new L.LayerGroup().addTo(mymap); // Layer to edit knooppunten 
 var editNetwerkLayer = new L.LayerGroup().addTo(mymap); // Layer to edit netwerk
 var myFietsrouteLayer = new L.LayerGroup().addTo(mymap); // Layer with all parts for my own fietsroute
-editKnooppuntenLayer.setZIndex(800);
 
 var baseMaps = {
     "Basismap": baselayer,
@@ -87,7 +86,6 @@ mymap.on('moveend', function (e) {
     if (mymap.getZoom() < 12) return;
     initFietsrouteData("knooppunten", mymap, editKnooppuntenLayer);
     initFietsrouteData("netwerken", mymap, editNetwerkLayer);
-    myFietsrouteLayer.setZIndex(800);
 });
 
 // console.log(xtd);

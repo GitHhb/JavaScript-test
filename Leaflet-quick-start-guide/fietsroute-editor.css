@@ -91,7 +91,7 @@ th {
   background-color: #d9d9d9;
 }
 
-tr:nth-child(even){
+tr:nth-child(odd){
   background-color: #f2f2f2;
 }
 
@@ -110,13 +110,19 @@ tr:hover {
 
 }
 
-#mijn-route {
+#route-info {
   display: inline-block;
   float: right;
   width: 20%;
 }
 
-.message {
+.route-message {
+  display: inline-block;
+  float: right;
+  width: 20%;
+}
+
+#mijn-route {
   display: inline-block;
   float: right;
   width: 20%;

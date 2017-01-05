@@ -70,7 +70,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                     className: 'markerDivIcon',
                     riseOnHover: true,
                     title: "I'm the title"
-                })})
+            })})
             .bindTooltip(i.nr + " " + i.name + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
                 riseOnHover: true,
                 direction: 'top',
@@ -78,8 +78,10 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                 offset: [-14, -55],
                 className: 'markerTooltip'
             })
-            .on('click', updateMyFietsrouteLayer("knooppunt", i,  L.marker(i.point, {icon: iconOrange}) ))
-            );
+            .on('click', updateMyFietsrouteLayer("knooppunt", i,
+              L.marker(i.point, {icon: iconOrange, zIndexOffset: 1000})
+            ))
+        );
     }
     knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
     // return L.layerGroup(knptMarkers);
