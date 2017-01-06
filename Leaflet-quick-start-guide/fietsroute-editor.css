@@ -127,3 +127,7 @@ tr:hover {
   float: right;
   width: 20%;
 }
+
+.control-section {
+  float: top;
+}

@@ -55,3 +55,8 @@ function toonMijnRoute (tag) {
     // write html to tag
     tag.innerHTML = html;
 }
+
+function deleteFietsroute () {
+    myFietsroute.deleteAll();
+    toonMijnRoute(htmlMijnRoute);
+}
