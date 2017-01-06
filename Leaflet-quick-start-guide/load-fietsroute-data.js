@@ -42,6 +42,7 @@ function initFietsrouteData (layerName, map, layer) {
                 layer.clearLayers();
                 extractKnooppunten(xmlDoc);
                 // editKnooppuntenLayer.addLayer(knooppuntenLayerGroup(knooppunten));
+                // knooppunten array must be loaded before layer can be filled, therefore this method must be called here
                 addToKnooppuntenLayerGroup(knooppunten, layer);
                 knooppuntenLoaded = true;
             } else { // layerName == "netwerken"
@@ -49,6 +50,7 @@ function initFietsrouteData (layerName, map, layer) {
                 layer.clearLayers();
                 extractNetwerken(xmlDoc);
                 // editNetwerkLayer.addLayer(netwerkenLayerGroup(netwerken));
+                // netwerken array must be loaded before layer can be filled, therefore this method must be called here
                 addToNetwerkenLayerGroup(netwerken, layer);
                 netwerkenLoaded = true;
             }

@@ -19,7 +19,7 @@ var iconOrange = L.icon({
 // Args: type = "knooppunt" | "netwerken"
 // layer: any layer type, f.e.: L.polyline or L.marker
 // Return: updated fietsroute or user message with reason that update is not possible 
-var updateMyFietsrouteLayer = function (type, element, layer) {
+var updateMyFietsrouteLayerORG = function (type, element, layer) {
     var selected = false;
     // var layer;
     var myFietsrouteIndex;
@@ -46,6 +46,24 @@ var updateMyFietsrouteLayer = function (type, element, layer) {
         // selected = !selected;
         showMessage(myFietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
+    }
+}
+
+var updateMyFietsrouteLayer = function (type, element, layer) {
+    return function (e) {
+    var len;
+    // first check if the element can be deleted
+    if (myFietsroute.delete(element.name) > 0) {
+        // deleted part of fietsroute
+        // myFietsroute.statusMessage = "Route vanaf " + element.name  + " verwijderd van fietsroute";
+        // myFietsrouteLayer.redraw();
+    } else if ( (len = myFietsroute.add(type, element, layer)) > 0 ) { 
+        // element not yet in route, so add element to route
+        myFietsroute.statusMessage = type + " deel toegevoegd";
+        myFietsrouteLayer.addLayer(layer);
+    }
+    showMessage(myFietsroute.statusMessage);
+    toonMijnRoute(htmlMijnRoute);
     }
 }
 

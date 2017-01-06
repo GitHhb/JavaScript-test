@@ -150,11 +150,35 @@ FietsrouteType.prototype.add = function (type, element, layer) {
 }
 
 // Remove last FietsrouteElement from the fietsroute array
-FietsrouteType.prototype.delete = function () {
+// Remove all FietsrouteElement-s from the fietsroute array starting from the element with id this.name
+// Return value: # of elements deleted
+FietsrouteType.prototype.delete = function (name) {
     // update this.matchCoords
     // compute this.matchCoords, now last element of fietsroute is the new element to match
-    var returnVal = this.fietsroute.last().matches(this.matchCoords);
-    this.matchCoords = returnVal.newCoords;
-    // remove last element from fietsroute
-    this.fietsroute.pop();
+    var routeLength = this.fietsroute.length;
+    for (var i = 0; i < routeLength; i++) {
+        if ( this.fietsroute[i].element.name == name ) 
+            break;
+    }
+    if (i >= routeLength)
+        // element not found
+        return 0;
+    // element found, delete element and all following elements
+    // first update status message before element containing the info we need is deleted
+    this.statusMessage = "Route vanaf " + this.fietsroute[i].element.name  + " verwijderd";
+    // start at end, so we can keep count of this.matchCoords
+    for (var j = routeLength - 1; j >= i; j--) {
+        // set this.matchCoords
+        if (i > 0) {
+            // only compute this.matchCoords if route has more than 1 element
+            var returnVal = this.fietsroute.last().matches(this.matchCoords);
+            this.matchCoords = returnVal.newCoords;
+        }
+        // update layer with fietsroute
+        myFietsrouteLayer.removeLayer(this.fietsroute.last().layer);
+        // remove last element from fietsroute
+        this.fietsroute.pop();
+    }
+    // return nr of deleted elements
+    return routeLength - i;
 }
