@@ -1,15 +1,15 @@
 var netwerkK2K = []; // Array of type NetwerkK2K
 
 
-var iconOrange = L.icon({
-    iconUrl: 'Image/marker-icon-orange.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [-3, -76],
-    // shadowUrl: 'my-icon-shadow.png',
-    shadowSize: [68, 95],
-    shadowAnchor: [22, 94]
-}); 
+// var iconOrange = L.icon({
+//     iconUrl: 'Image/marker-icon-orange.png',
+//     iconSize: [25, 41],
+//     iconAnchor: [12, 41],
+//     popupAnchor: [-3, -76],
+//     // shadowUrl: 'my-icon-shadow.png',
+//     shadowSize: [68, 95],
+//     shadowAnchor: [22, 94]
+// }); 
 
 // var OrangeIcon = L.Icon.Default.extend( {
 //     options: {iconUrl: 'Image/marker-icon-orange.png'}
@@ -70,9 +70,10 @@ var iconOrange = L.icon({
 // Args: type = "knooppunt" | "netwerken"
 // layer: any layer type, f.e.: L.polyline or L.marker
 // Return: updated fietsroute or user message with reason that update is not possible
-var addToMyFietsrouteLayer = function (type, element, layer) {
+var addElementToMyFietsrouteLayer = function (type, element) {
     return function (e) {
-        myFietsroute.add(type, element, layer);
+        // myFietsroute.add(type, element);
+        myFietsroute.addRouteUptoMarker(type, element);
         // var len;
         // if ( (len = myFietsroute.add(type, element, layer)) > 0 ) { 
             // element not yet in route, so add element to route
@@ -86,7 +87,7 @@ var addToMyFietsrouteLayer = function (type, element, layer) {
 
 // Arg: id = unique name of element, element.name  
 // Return: updated fietsroute or user message with reason that update is not possible
-var deleteFromMyFietsrouteLayer = function (id) {
+var deleteElementFromMyFietsrouteLayer = function (id) {
     return function (e) {
         // first check if the element can be deleted
         myFietsroute.delete(id);
@@ -127,10 +128,8 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                 offset: [-14, -55],
                 className: 'markerTooltip'
             })
-            .on('click', addToMyFietsrouteLayer("knooppunt", i,
-              L.marker(i.point, {icon: iconOrange, zIndexOffset: 1000})
-            ))
-            .on('contextmenu', deleteFromMyFietsrouteLayer(i.name))
+            .on('click', addElementToMyFietsrouteLayer("knooppunt", i))
+            .on('contextmenu', deleteElementFromMyFietsrouteLayer(i.name))
         );
     }
     knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
@@ -160,8 +159,8 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
                     offset: [5, -5]
                 }
             )
-            .on('click', addToMyFietsrouteLayer("netwerken", i,  L.polyline(i.coordinateArr, {color: 'orange'})))
-            .on('contextmenu', deleteFromMyFietsrouteLayer(i.name))
+            .on('click', addElementToMyFietsrouteLayer("netwerken", i))
+            .on('contextmenu', deleteElementFromMyFietsrouteLayer(i.name))
         );
     }
     // return networkLayerGroup;
