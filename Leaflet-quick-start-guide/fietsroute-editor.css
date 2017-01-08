@@ -101,6 +101,15 @@ tr:hover {
 
 .td-fietsroute-type {
   text-align: center;
+
+}
+.td-fietsroute-knooppunt {
+  text-align: center;
+}
+
+.td-fietsroute-length {
+  text-align: right;
+  padding-right: 16px;
 }
 
 #mapid {
