@@ -123,6 +123,7 @@ tr:hover {
   display: inline-block;
   float: right;
   width: 20%;
+  height: 800px;
 }
 
 .route-message {
