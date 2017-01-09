@@ -4,7 +4,8 @@ var knooppuntLayer; // pdok marker layer
 // myFietsroute contains the fietsroute parts
 // consecutive array elements must have matching coordinates  
 // var myFietsroute = []; // Array of MyFietsrouteType
-var myFietsroute = new FietsrouteType; // Array of MyFietsrouteType
+var myFietsroute = new FietsrouteType; // the real fietsroute
+var myMouseoverFietsroute = new FietsrouteType; // used for mouseovers
 
 
 var messageTag = document.getElementById("message");

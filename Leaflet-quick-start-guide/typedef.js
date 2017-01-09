@@ -309,3 +309,17 @@ FietsrouteType.prototype.deleteLast = function () {
         this.delete(this.fietsroute.last().element.name);
     }
 }
+
+FietsrouteType.prototype.copyLastElementFrom = function (route) {
+    // if route has no elements, we can't copy anything
+    if (route.fietsroute.length == 0) return;
+    // do the copy
+    this.fietsroute.push(route.fietsroute.last());
+    this.statusMessage = route.statusMessage;
+    this.matchCoords = route.matchCoords;
+}
+
+// Check if fietsroute contains element with id name
+FietsrouteType.prototype.contains = function (name) {
+    return this.fietsroute.some( x => x.element.name == name);
+}

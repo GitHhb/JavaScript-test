@@ -1,100 +1,44 @@
 var netwerkK2K = []; // Array of type NetwerkK2K
 
-
-// var iconOrange = L.icon({
-//     iconUrl: 'Image/marker-icon-orange.png',
-//     iconSize: [25, 41],
-//     iconAnchor: [12, 41],
-//     popupAnchor: [-3, -76],
-//     // shadowUrl: 'my-icon-shadow.png',
-//     shadowSize: [68, 95],
-//     shadowAnchor: [22, 94]
-// }); 
-
-// var OrangeIcon = L.Icon.Default.extend( {
-//     options: {iconUrl: 'Image/marker-icon-orange.png'}
-// });
-// var iconOrange = new OrangeIcon();
-
-// // Args: type = "knooppunt" | "netwerken"
-// // layer: any layer type, f.e.: L.polyline or L.marker
-// // Return: updated fietsroute or user message with reason that update is not possible 
-// var updateMyFietsrouteLayerORG = function (type, element, layer) {
-//     var selected = false;
-//     // var layer;
-//     var myFietsrouteIndex;
-//     // Toggle selection and thus visibility
-//     return function (e) {
-//         // console.log(layer, e._leaflet_id);
-//         if (!selected) {
-//             var len;
-//             if ( (len = myFietsroute.add(type, element, this)) > 0 ) { 
-//                 myFietsrouteLayer.addLayer(layer);
-//                 myFietsrouteIndex = len - 1;
-//                 selected = true;
-//             }
-//         } else {
-//             // remove fietsroute element
-//             if (myFietsrouteIndex < myFietsroute.fietsroute.length-1) {
-//                 myFietsroute.fietsroute[myFietsrouteIndex + 1].layer.fire('click');
-//             }
-//                 myFietsrouteLayer.removeLayer(layer);
-//                 myFietsroute.delete();
-//                 // myFietsroute.fietsroute.splice(myFietsrouteIndex, 1);
-//             selected = false;
-//         };
-//         // selected = !selected;
-//         showMessage(myFietsroute.statusMessage);
-//         toonMijnRoute(htmlMijnRoute);
-//     }
-// }
-
-// var updateMyFietsrouteLayer = function (type, element, layer) {
-//     return function (e) {
-//         var len;
-//         // first check if the element can be deleted
-//         if (myFietsroute.delete(element.name) > 0) {
-//             // deleted part of fietsroute
-//             // myFietsroute.statusMessage = "Route vanaf " + element.name  + " verwijderd van fietsroute";
-//             // myFietsrouteLayer.redraw();
-//         } else if ( (len = myFietsroute.add(type, element, layer)) > 0 ) { 
-//             // element not yet in route, so add element to route
-//             myFietsroute.statusMessage = type + " deel toegevoegd";
-//             myFietsrouteLayer.addLayer(layer);
-//         }
-//         showMessage(myFietsroute.statusMessage);
-//         toonMijnRoute(htmlMijnRoute);
-//     }
-// }
-
 // Args: type = "knooppunt" | "netwerken"
-// layer: any layer type, f.e.: L.polyline or L.marker
+//       fietsroute: of type FietsrouteType
 // Return: updated fietsroute or user message with reason that update is not possible
-var addElementToMyFietsrouteLayer = function (type, element) {
+var addElementToFietsroute = function (type, element, fietsroute) {
     return function (e) {
-        // myFietsroute.add(type, element);
-        myFietsroute.addRouteUptoMarker(type, element);
-        // var len;
-        // if ( (len = myFietsroute.add(type, element, layer)) > 0 ) { 
-            // element not yet in route, so add element to route
-            // myFietsroute.statusMessage = type + " deel toegevoegd";
-            // myFietsrouteLayer.addLayer(layer);
-        // }
-        showMessage(myFietsroute.statusMessage);
+        fietsroute.addRouteUptoMarker(type, element);
+        showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
     }
 }
 
-// Arg: id = unique name of element, element.name  
-// Return: updated fietsroute or user message with reason that update is not possible
-var deleteElementFromMyFietsrouteLayer = function (id) {
+var mouseoverAddElementToFietsroute = function (type, element, fietsroute) {
     return function (e) {
-        // first check if the element can be deleted
-        myFietsroute.delete(id);
-            // deleted part of fietsroute
-            // myFietsroute.statusMessage = "Route vanaf " + element.name  + " verwijderd van fietsroute";
-            // myFietsrouteLayer.redraw();
-        showMessage(myFietsroute.statusMessage);
+        // if element is in myFietsroute, don't act on mouseover
+        if (myFietsroute.contains(element.name)) return;
+        fietsroute.copyLastElementFrom(myFietsroute);
+        fietsroute.addRouteUptoMarker(type, element);
+        showMessage(fietsroute.statusMessage);
+        toonMijnRoute(htmlMijnRoute);
+    }
+}
+
+// Args: id = unique name of element, element.name  
+//       fietsroute: of type FietsrouteType
+// Return: updated fietsroute or user message with reason that update is not possible
+var deleteElementFromFietsroute = function (id, fietsroute) {
+    return function (e) {
+        fietsroute.delete(id);
+        showMessage(fietsroute.statusMessage);
+        toonMijnRoute(htmlMijnRoute);
+    }
+}
+
+var mouseoverDeleteElementFromFietsroute = function (element, fietsroute) {
+    return function (e) {
+        // if element is in myFietsroute, don't act on mouseover
+        if (myFietsroute.contains(element.name)) return;
+        fietsroute.deleteAll();
+        showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
     }
 }
@@ -128,8 +72,10 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                 offset: [-14, -55],
                 className: 'markerTooltip'
             })
-            .on('click', addElementToMyFietsrouteLayer("knooppunt", i))
-            .on('contextmenu', deleteElementFromMyFietsrouteLayer(i.name))
+            .on('click', addElementToFietsroute("knooppunt", i, myFietsroute))
+            .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
+            .on('mouseover', mouseoverAddElementToFietsroute("knooppunt", i, myMouseoverFietsroute))
+            .on('mouseout', mouseoverDeleteElementFromFietsroute(i, myMouseoverFietsroute))
         );
     }
     knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
@@ -159,8 +105,10 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
                     offset: [5, -5]
                 }
             )
-            .on('click', addElementToMyFietsrouteLayer("netwerken", i))
-            .on('contextmenu', deleteElementFromMyFietsrouteLayer(i.name))
+            .on('click', addElementToFietsroute("netwerken", i, myFietsroute))
+            .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
+            .on('mouseover', mouseoverAddElementToFietsroute("netwerken", i, myMouseoverFietsroute))
+            .on('mouseout', mouseoverDeleteElementFromFietsroute(i, myMouseoverFietsroute))
         );
     }
     // return networkLayerGroup;
