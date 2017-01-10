@@ -6,19 +6,28 @@ var netwerkK2K = []; // Array of type NetwerkK2K
 var addElementToFietsroute = function (type, element, fietsroute) {
     return function (e) {
         fietsroute.addRouteUptoMarker(type, element);
+        // myFietsroute.redrawLayer(myFietsrouteLayer);
         showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
     }
 }
 
+// On mouserover create a new route, startpoint is last element of existing route
+// Show route parts that can be added
 var mouseoverAddElementToFietsroute = function (type, element, fietsroute) {
     return function (e) {
         // if element is in myFietsroute, don't act on mouseover
         if (myFietsroute.contains(element.name)) return;
-        fietsroute.copyLastElementFrom(myFietsroute);
+        if ( myFietsroute.fietsroute.length > 0) {
+            fietsroute.copyLastElementFrom(myFietsroute);
+            // fietsroute now has 1 element, equal to last element of existing route
+            // don't create a layer for this so we won't overwrite the existing one 
+            fietsroute.fietsroute.last().layer = null;
+        }
         fietsroute.addRouteUptoMarker(type, element);
-        showMessage(fietsroute.statusMessage);
-        toonMijnRoute(htmlMijnRoute);
+        // myFietsroute.redrawLayer(myFietsrouteLayer);
+        // showMessage(fietsroute.statusMessage);
+        // toonMijnRoute(htmlMijnRoute);
     }
 }
 
@@ -28,6 +37,7 @@ var mouseoverAddElementToFietsroute = function (type, element, fietsroute) {
 var deleteElementFromFietsroute = function (id, fietsroute) {
     return function (e) {
         fietsroute.delete(id);
+        // myFietsroute.redrawLayer(myFietsrouteLayer);
         showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
     }
@@ -39,9 +49,9 @@ var mouseoutDeleteElementFromFietsroute = function (element, fietsroute) {
         // if (myFietsroute.contains(element.name)) return;
         fietsroute.deleteAll();
         // dirty fix, as up to know we explicitly add and delete route parts as needed
-        myFietsroute.redrawLayer(myFietsrouteLayer);
-        showMessage(fietsroute.statusMessage);
-        toonMijnRoute(htmlMijnRoute);
+        // myFietsroute.redrawLayer(myFietsrouteLayer);
+        // showMessage(fietsroute.statusMessage);
+        // toonMijnRoute(htmlMijnRoute);
     }
 }
 

@@ -94,6 +94,12 @@ function FietsrouteElement (type, element, layer, startPoint, endPoint, cumLengt
     this.cumLength = cumLength || 0; // length of fietsroute, cumulative to previous elements in route
 }
 
+// Create deep clone of 'this' FietsrouteElement
+FietsrouteElement.prototype.deepClone = function () {
+    var f = new FietsrouteElement(this.type, this.element, this.layer, this.startPoint, this.endPoint, this.cumLength);
+    return f;
+}
+
 // Check if "this" FietsrouteElement matches with "matchCoords"
 // Used to check if an element fits onto the existing route and compute the new coords to which the next element should fit
 // Arg: element: of type FietsrouteElement, new element to be checked
@@ -290,7 +296,8 @@ FietsrouteType.prototype.delete = function (name) {
     // start at end, so we can keep count of this.matchCoords
     for (var j = routeLength - 1; j >= i; j--) {
         // update layer with fietsroute
-        myFietsrouteLayer.removeLayer(this.fietsroute.last().layer);
+        // myFietsrouteLayer.removeLayer(this.fietsroute.last().layer);
+        this.removeElementFromLayer(this.fietsroute.last());
         // remove last element from fietsroute
         this.fietsroute.pop();
     }
@@ -299,6 +306,11 @@ FietsrouteType.prototype.delete = function (name) {
         this.matchCoords = this.fietsroute.last().endPoint;
     // return nr of deleted elements
     return routeLength - i;
+}
+
+FietsrouteType.prototype.removeElementFromLayer = function (element) {
+    if (element.layer == null) return;
+    myFietsrouteLayer.removeLayer(element.layer);
 }
 
 FietsrouteType.prototype.deleteAll = function () {
@@ -313,11 +325,12 @@ FietsrouteType.prototype.deleteLast = function () {
     }
 }
 
+// Create deep clone of last Element
 FietsrouteType.prototype.copyLastElementFrom = function (route) {
     // if route has no elements, we can't copy anything
     if (route.fietsroute.length == 0) return;
     // do the copy
-    this.fietsroute.push(route.fietsroute.last());
+    this.fietsroute.push(route.fietsroute.last().deepClone());
     this.statusMessage = route.statusMessage;
     this.matchCoords = route.matchCoords;
 }
