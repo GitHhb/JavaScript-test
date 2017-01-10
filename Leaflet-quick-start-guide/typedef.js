@@ -115,18 +115,15 @@ FietsrouteElement.prototype.matches = function (matchCoords) {
     // var lastElement = this;
     var routeElement = this;
     if (routeElement.type == "knooppunt") {
-        console.log("MATCH" + 1);
         canAdd = compareCoord(matchCoords, routeElement.element.point);
         // new matchCoords are the coords of the new "knooppunt"
         startPoint = routeElement.element.point;
         endPoint   = routeElement.element.point;
     } else { // if (routeElement.type == "netwerken") {
         if ( canAdd = compareCoord(matchCoords, routeElement.element.coordinateArr.first()) ) {
-            console.log("MATCH" + 2);
             startPoint = routeElement.element.coordinateArr.first();
             endPoint   = routeElement.element.coordinateArr.last();
         } else if ( canAdd = compareCoord(matchCoords, routeElement.element.coordinateArr.last()) ) {
-            console.log("MATCH" + 3);
             startPoint = routeElement.element.coordinateArr.last();
             endPoint   = routeElement.element.coordinateArr.first();
         }

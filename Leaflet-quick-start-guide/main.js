@@ -82,7 +82,6 @@ initFietsrouteData("netwerken", mymap, editNetwerkLayer);
 // mymap.on('viewreset', function (e) {console.log("View was reset")});
 // mymap.on('zoomend', function (e) {console.log("View was zoom ended")});
 mymap.on('moveend', function (e) {
-    console.log("View was move ended");
     // Don't load map data for large zoom levels as this requires too many data
     if (mymap.getZoom() < 12) return;
     initFietsrouteData("knooppunten", mymap, editKnooppuntenLayer);

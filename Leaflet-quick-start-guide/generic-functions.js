@@ -31,7 +31,6 @@ function compareCoord(c1, c2) {
 
 function toonMijnRoute (tag) {
     // console.log(myFietsrouteLayer.getLayers());
-    console.log(myFietsroute);
     var html = `<table class="fietsroute-table">
         <tr>
             <th class="td-fietsroute-type">Type</th>
