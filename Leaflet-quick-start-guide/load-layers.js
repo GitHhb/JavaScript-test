@@ -33,11 +33,13 @@ var deleteElementFromFietsroute = function (id, fietsroute) {
     }
 }
 
-var mouseoverDeleteElementFromFietsroute = function (element, fietsroute) {
+var mouseoutDeleteElementFromFietsroute = function (element, fietsroute) {
     return function (e) {
         // if element is in myFietsroute, don't act on mouseover
-        if (myFietsroute.contains(element.name)) return;
+        // if (myFietsroute.contains(element.name)) return;
         fietsroute.deleteAll();
+        // dirty fix, as up to know we explicitly add and delete route parts as needed
+        myFietsroute.redrawLayer(myFietsrouteLayer);
         showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
     }
@@ -75,7 +77,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
             .on('click', addElementToFietsroute("knooppunt", i, myFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
             .on('mouseover', mouseoverAddElementToFietsroute("knooppunt", i, myMouseoverFietsroute))
-            .on('mouseout', mouseoverDeleteElementFromFietsroute(i, myMouseoverFietsroute))
+            .on('mouseout', mouseoutDeleteElementFromFietsroute(i, myMouseoverFietsroute))
         );
     }
     knptLayerGroup.addLayer(L.layerGroup(knptMarkers));
@@ -108,7 +110,7 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
             .on('click', addElementToFietsroute("netwerken", i, myFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
             .on('mouseover', mouseoverAddElementToFietsroute("netwerken", i, myMouseoverFietsroute))
-            .on('mouseout', mouseoverDeleteElementFromFietsroute(i, myMouseoverFietsroute))
+            .on('mouseout', mouseoutDeleteElementFromFietsroute(i, myMouseoverFietsroute))
         );
     }
     // return networkLayerGroup;

@@ -269,10 +269,13 @@ FietsrouteType.prototype.delete = function (name) {
     // update this.matchCoords
     // compute this.matchCoords, last element of fietsroute will become the new element to match
     var routeLength = this.fietsroute.length;
-    for (var i = 0; i < routeLength; i++) {
-        if ( this.fietsroute[i].element.name == name ) 
-            break;
-    }
+    // for (var i = 0; i < routeLength; i++) {
+    //     if ( this.fietsroute[i].element.name == name ) 
+    //         break;
+    // }
+    var i = this.findFirstIndex(name);
+    if ( i < 0 )
+        return; 
     if (i >= routeLength)
         // element not found
         return 0;
@@ -323,3 +326,16 @@ FietsrouteType.prototype.copyLastElementFrom = function (route) {
 FietsrouteType.prototype.contains = function (name) {
     return this.fietsroute.some( x => x.element.name == name);
 }
+
+// Find index of first occurrence of name in 'this'.
+// If name is not found -1 is returned.
+FietsrouteType.prototype.findFirstIndex = function (name) {
+    return this.fietsroute.findIndex( x => x.element.name == name);
+}
+
+// Redraw the layer of 'this'
+FietsrouteType.prototype.redrawLayer = function (layer) {
+    layer.clearLayers();
+    this.fietsroute.forEach( x => layer.addLayer(x.layer));
+}
+
