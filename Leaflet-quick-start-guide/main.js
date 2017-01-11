@@ -1,11 +1,14 @@
 var mymap;
 var mycontrol; // The base layer
 var knooppuntLayer; // pdok marker layer
-// myFietsroute contains the fietsroute parts
-// consecutive array elements must have matching coordinates  
-// var myFietsroute = []; // Array of MyFietsrouteType
-var myFietsroute = new FietsrouteType; // the real fietsroute
-var myMouseoverFietsroute = new FietsrouteType; // used for mouseovers
+
+// the real fietsroute
+var myFietsroute = new FietsrouteType();
+var myFietsrouteLayer = myFietsroute.layer; // Layer with all parts for my own fietsroute
+
+// the fietsroute to show on mouseover
+var myMouseoverFietsroute = new FietsrouteType(); // used for mouseovers
+var myMouseoverFietsrouteLayer = myMouseoverFietsroute.layer;
 
 
 var messageTag = document.getElementById("message");
@@ -55,7 +58,10 @@ var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/f
 
 var editKnooppuntenLayer = new L.LayerGroup().addTo(mymap); // Layer to edit knooppunten 
 var editNetwerkLayer = new L.LayerGroup().addTo(mymap); // Layer to edit netwerk
-var myFietsrouteLayer = new L.LayerGroup().addTo(mymap); // Layer with all parts for my own fietsroute
+// Add Layer with my own fietsroute
+myFietsrouteLayer.addTo(mymap);
+// Add Layer for mouseovers
+myMouseoverFietsrouteLayer.addTo(mymap);
 
 var baseMaps = {
     "Basismap": baselayer,

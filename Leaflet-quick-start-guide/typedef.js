@@ -142,10 +142,21 @@ FietsrouteElement.prototype.computeLength = function () {
         (len, curVal, curI, arr) => len + (curI === 0 ? 0 : arr[curI-1].distanceTo(curVal)), 0);
 }
 
+// myFietsroute contains the fietsroute parts
+// consecutive array elements must have matching coordinates  
 function FietsrouteType () {
-    this.fietsroute = []   ; // Array of FietsrouteElement
-    this.statusMessage = ""; // String with status info of performed operation
-    this.matchCoords = null; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
+    this.layer = L.layerGroup(); // Leaflet layer containing the fietsroute
+    this.fietsroute = []       ; // Array of FietsrouteElement
+    this.statusMessage = ""    ; // String with status info of performed operation
+    this.matchCoords = null    ; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
+    this.layerDefaultIcon;
+    this.layerStartIcon;
+    this.layerEndIcon;
+    this.layerLineColor;
+}
+
+FietsrouteType.prototype.elementFactory = function (type, element, layer, startPoint, endPoint, cumLength) {
+
 }
 
 // // Check if an element fits onto the existing route and compute the new coords to which the next element should fit
@@ -217,7 +228,8 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
     if (canAdd) {
         this.matchCoords = newMatchCoords;
         this.statusMessage = type + " deel toegevoegd";
-        if (! noLayer) {myFietsrouteLayer.addLayer(newFietsrouteElement.layer);}
+        // if (! noLayer) {myFietsrouteLayer.addLayer(newFietsrouteElement.layer);}
+        if (! noLayer) {this.layer.addLayer(newFietsrouteElement.layer);}
         return this.fietsroute.push(newFietsrouteElement);
     }
     else {
@@ -244,7 +256,8 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
     // Check if a "netwerken" element matches the last added element 
     // create a fietsroute for testing different routes (do not add to layer)
     var newroute = new FietsrouteType();
-    newroute.add( myFietsroute.fietsroute.last().type, myFietsroute.fietsroute.last().element, true);
+    // newroute.add( myFietsroute.fietsroute.last().type, myFietsroute.fietsroute.last().element, true);
+    newroute.copyLastElementFrom(this);
     for (let i = 0; i < netwerken.length; i++) {
         // console.log("TRY match netwerken" + i);
         // element is of type "knooppunt", do a dryrun add to check if this "netwerken" element can be added
@@ -307,7 +320,8 @@ FietsrouteType.prototype.delete = function (name) {
 
 FietsrouteType.prototype.removeElementFromLayer = function (element) {
     if (element.layer == null) return;
-    myFietsrouteLayer.removeLayer(element.layer);
+    // myFietsrouteLayer.removeLayer(element.layer);
+    this.layer.removeLayer(element.layer);
 }
 
 FietsrouteType.prototype.deleteAll = function () {
@@ -322,7 +336,8 @@ FietsrouteType.prototype.deleteLast = function () {
     }
 }
 
-// Create deep clone of last Element
+// Create deep clone of last Element of route and add it to end of the fietsroute of 'this'
+// Also copy status info, but don't copy layer (as this is closely related to the fietsroute)
 FietsrouteType.prototype.copyLastElementFrom = function (route) {
     // if route has no elements, we can't copy anything
     if (route.fietsroute.length == 0) return;
