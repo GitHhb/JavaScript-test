@@ -16,8 +16,8 @@ var addElementToFietsroute = function (type, element, fietsroute) {
 // Show route parts that can be added
 var mouseoverAddElementToFietsroute = function (type, element, fietsroute) {
     return function (e) {
-        // if element is in myFietsroute, don't act on mouseover
-        if (myFietsroute.contains(element.name)) return;
+        // // if element is in myFietsroute, don't act on mouseover
+        // if (myFietsroute.contains(element.name)) return;
         if ( myFietsroute.fietsroute.length > 0) {
             fietsroute.copyLastElementFrom(myFietsroute);
             // fietsroute now has 1 element, equal to last element of existing route

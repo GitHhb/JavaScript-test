@@ -279,7 +279,8 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
     // }  
 }
 
-// Remove all FietsrouteElement-s from the fietsroute array starting from the element with id this.name
+// Remove all FietsrouteElement-s from the fietsroute array starting from
+// the element with id this.name, if multiple matches the last match is taken
 // Return value: # of elements deleted
 FietsrouteType.prototype.delete = function (name) {
     // update this.matchCoords
@@ -289,12 +290,12 @@ FietsrouteType.prototype.delete = function (name) {
     //     if ( this.fietsroute[i].element.name == name ) 
     //         break;
     // }
-    var i = this.findFirstIndex(name);
+    var i = this.findLastIndex(name);
+    // element not found
     if ( i < 0 )
-        return; 
-    if (i >= routeLength)
-        // element not found
-        return 0;
+        return i; 
+    // if (i >= routeLength)
+    //     return 0;
     // element found, delete element and all following elements
     // first update status message before element containing the info we need is deleted
     this.statusMessage = "Route vanaf " +
@@ -325,9 +326,12 @@ FietsrouteType.prototype.removeElementFromLayer = function (element) {
 }
 
 FietsrouteType.prototype.deleteAll = function () {
-    if (this.fietsroute.length > 0) {
-        this.delete(this.fietsroute[0].element.name);
-    }
+    // if (this.fietsroute.length > 0) {
+    //     this.delete(this.fietsroute[0].element.name);
+    // }
+    this.fietsroute = [];
+    this.layer.clearLayers();
+    this.statusMessage = "Fietsroute verdwijderd."
 }
 
 FietsrouteType.prototype.deleteLast = function () {
@@ -352,10 +356,19 @@ FietsrouteType.prototype.contains = function (name) {
     return this.fietsroute.some( x => x.element.name == name);
 }
 
-// Find index of first occurrence of name in 'this'.
+// Find index of element containing first occurrence of name in 'this'.
 // If name is not found -1 is returned.
 FietsrouteType.prototype.findFirstIndex = function (name) {
     return this.fietsroute.findIndex( x => x.element.name == name);
+}
+
+// Find index of element containing last occurrence of name in 'this'.
+// If name is not found -1 is returned.
+FietsrouteType.prototype.findLastIndex = function (name) {
+    for (var i = this.fietsroute.length - 1; i >= 0; i--) {
+        if ( this.fietsroute[i].element.name == name ) 
+            return i;
+    }
 }
 
 // Redraw the layer of 'this'

@@ -62,3 +62,9 @@ function deleteFietsroute () {
     myFietsroute.deleteAll();
     toonMijnRoute(htmlMijnRoute);
 }
+
+function printRoute () {
+    var txt = "";
+    showMessage( myFietsroute.fietsroute.forEach( (txt,x) => txt + JSON.stringify(x.element), "" ) );
+    // showMessage(JSON.stringify(myFietsroute.fietsroute));
+}

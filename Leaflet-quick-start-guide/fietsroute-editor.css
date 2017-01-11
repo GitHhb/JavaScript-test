@@ -30,7 +30,6 @@
   text-align:center;
   border-radius:50%;
   line-height:40px;
-  line-width:30px;
   width:20px;
   height:20px;
 }
@@ -44,7 +43,7 @@
 }
 
 .markerDivIcon:hover {
-  border: 5px solid darkorange;
+  border: 5px solid lawngreen;
 }
 .markerDivIcon {
   background: rgba(30, 144, 255,0.2);;
@@ -56,7 +55,7 @@
 }
 
 .netwerkDivIcon:hover {
-  border: 5px solid darkorange;
+  border: 5px solid lawngreen;
 }
 
 .netwerkDivIcon {
@@ -113,27 +112,27 @@ tr:hover {
 }
 
 #mapid {
-  display: inline-block;
+  /*display: inline-block;*/
   float: left;
   width: 75%;
 
 }
 
 #route-info {
-  display: inline-block;
+  /*display: inline-block;*/
   float: right;
   width: 20%;
   height: 800px;
 }
 
 .route-message {
-  display: inline-block;
+  /*display: inline-block;*/
   float: right;
   width: 20%;
 }
 
 #mijn-route {
-  display: inline-block;
+  /*display: inline-block;*/
   float: right;
   width: 20%;
 }
