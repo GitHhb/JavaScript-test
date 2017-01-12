@@ -71,7 +71,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
             // L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
             L.marker(i.point, {icon: L.divIcon({
                 iconSize: [12, 12],
-                iconAnchor: [12, 12],
+                iconAnchor: [14, 14],
                 // iconAnchor: [14, 65],
                     html: "<b>" + i.nr + "</b>",
                     className: 'markerDivIcon',
@@ -106,7 +106,7 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
         networkLayerGroup.addLayer(L.marker(i.point, {icon: L.divIcon({
                     // html: "<i>" + i.name.split('.')[1] + "</i>",
                     className: 'netwerkDivIcon',
-                    iconAnchor: [10, 10],
+                    iconAnchor: [9, 9],
                     riseOnHover: true,
                     title: "I'm the title",
                     offset: [-5, -5]

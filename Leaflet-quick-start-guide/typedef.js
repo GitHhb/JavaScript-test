@@ -57,8 +57,10 @@ var iconOrange = L.icon({
 
 var iconFietsrouteStart = L.icon({
     iconUrl: 'Image/marker-icon-start-azure.png',
-    iconSize: [48, 48],
-    iconAnchor: [24, 48],
+    // iconSize: [48, 48],
+    // iconAnchor: [24, 48],
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
     popupAnchor: [-3, -76],
     // shadowUrl: 'my-icon-shadow.png',
     shadowSize: [68, 95],

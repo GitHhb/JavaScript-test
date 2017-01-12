@@ -63,8 +63,21 @@ function deleteFietsroute () {
     toonMijnRoute(htmlMijnRoute);
 }
 
-function printRoute () {
+function saveRoute () {
+    console.log("SAVE route");
     var txt = "";
-    showMessage( myFietsroute.fietsroute.reduce( (txt,x) => txt + JSON.stringify(x.element), "" ) );
+    var routeAsJson = myFietsroute.fietsroute.reduce( (txt,x) => txt + JSON.stringify(x.element), "" );
+    showMessage( routeAsJson );
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log( this.responseText );
+        }
+    };
+    xhttp.open("POST", "http://localhost:8081/route/store/Waterpoort", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send("jsondata=" + routeAsJson);
+
     // showMessage(JSON.stringify(myFietsroute.fietsroute));
 }

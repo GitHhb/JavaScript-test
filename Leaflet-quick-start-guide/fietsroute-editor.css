@@ -51,17 +51,17 @@
   border: 5px solid rgba(30, 144, 255,0.9);
   text-align: left;
   line-height: 12px;
-  border-radius: 50%;
+  border-radius: 40%;
 }
 
 .netwerkDivIcon:hover {
-  border: 5px solid lawngreen;
+  border: 3px solid lawngreen;
 }
 
 .netwerkDivIcon {
   background: rgba(0, 179, 0, 0.2);
   background-size: 60px 60px;
-  border: 5px solid rgba(0, 179, 0, 0.9);
+  border: 3px solid rgba(0, 179, 0, 0.9);
   color:green;
   font-weight:bold;
   text-align:left;

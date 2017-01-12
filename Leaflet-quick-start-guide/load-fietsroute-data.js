@@ -70,9 +70,9 @@ function extractKnooppunten (xmlDoc) {
     for (var i = 0; i < x.length; i++) {
         var name = x[i].getAttribute("id");
         // Tag "name" marks the knooppuntnr
-        var knptNr = x[i].getElementsByTagName("name")[0].innerHTML;
+        var knptNr = x[i].getElementsByTagName("name")[0].textContent;
         // Tag "coordinates" marks the coordinates
-        var knptArr = x[i].getElementsByTagName("coordinates")[0].innerHTML.split(',');
+        var knptArr = x[i].getElementsByTagName("coordinates")[0].textContent.split(',');
         var pointCoord = L.latLng(knptArr[1], knptArr[0]);
         knooppunten.push(new KnooppuntType(name, knptNr, pointCoord));
         // console.log(knptCoords[1] + ", " + knptCoords[0]);
@@ -88,12 +88,12 @@ function extractNetwerken (xmlDoc) {
     for (var i = 0; i < x.length; i++) {
         var netwerkLineString = []; // LineString of netwerken coords
         // Tag "name" marks the netwerk name
-        var netwerkName = x[i].getElementsByTagName("name")[0].innerHTML;
+        var netwerkName = x[i].getElementsByTagName("name")[0].textContent;
         // Tag "Point > coordinates" marks the Point coordinates
-        var pointArr = x[i].getElementsByTagName("Point")[0].getElementsByTagName("coordinates")[0].innerHTML.split(',');
+        var pointArr = x[i].getElementsByTagName("Point")[0].getElementsByTagName("coordinates")[0].textContent.split(',');
         var pointCoord = L.latLng(pointArr[1], pointArr[0]);
         // Tag "LineString > coordinates" marks the route coordinates
-        var lineCoordArr = x[i].getElementsByTagName("LineString")[0].getElementsByTagName("coordinates")[0].innerHTML.split(' ');
+        var lineCoordArr = x[i].getElementsByTagName("LineString")[0].getElementsByTagName("coordinates")[0].textContent.split(' ');
         // console.log("NETWERKEN", lineCoordArr);
         for (var j = 0; j < lineCoordArr.length; j++) {
             var s = lineCoordArr[j].split(',');
