@@ -67,6 +67,18 @@ var iconFietsrouteStart = L.icon({
     shadowAnchor: [22, 94]
 }); 
 
+var iconFietsrouteFinish = L.icon({
+    iconUrl: 'Image/marker-icon-finish-flag-azure.png',
+    // iconSize: [48, 48],
+    // iconAnchor: [24, 48],
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
+    popupAnchor: [-3, -76],
+    // shadowUrl: 'my-icon-shadow.png',
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+}); 
+
 function FietsrouteElement (type, element, layer, startPoint, endPoint, cumLength) {
     this.type = type;      // "netwerken" || "knooppunt"
     this.element = element; // type of element is this.type
@@ -151,25 +163,27 @@ function FietsrouteType () {
     this.fietsroute = []       ; // Array of FietsrouteElement
     this.statusMessage = ""    ; // String with status info of performed operation
     this.matchCoords = null    ; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
-    this.layerDefaultIcon;
-    this.layerStartIcon;
-    this.layerFinishIcon;
-    this.layerLineColor;
+    this.defaultIconProps = {icon: iconOrange/*, zIndexOffset: 1000*/};
+    this.startIconProps = {icon: iconFietsrouteStart};
+    this.finishIconProps = {icon: iconFietsrouteFinish};
+    this.lineColorProps = {color: 'orange'};
 }
 
 FietsrouteType.prototype.elementFactory = function (type, element, layer, startPoint, endPoint, cumLength) {
+    var knptOrLine = null;
     if (type == "knooppunt") {
-        var marker = null;
         if (this.length == 0) {
             // first element of route => use start icon
-            marker = L.marker(element.point, {icon: this.layerStartIcon/*, zIndexOffset: 1000*/});
+            knptOrLine = L.marker(element.point, this.startIconProps);
         } else {
             // this element will be added to the end of the route => use finish icon
-            marker = L.marker(element.point, {icon: this.layerFinishIcon/*, zIndexOffset: 1000*/});
+            knptOrLine = L.marker(element.point, this.finishIconProps);
         }
-        return new FietsrouteElement(type, element, marker, startPoint, endPoint, cumLength);
+    } else if (type == "netwerken") {
+        knpOrLine = L.polyline( element.coordinateArr, this.lineColorProps);
     }
-
+    // no valid element requested
+    return new FietsrouteElement(type, element, knptOrLine, startPoint, endPoint, cumLength);
 }
 
 // // Check if an element fits onto the existing route and compute the new coords to which the next element should fit
@@ -252,8 +266,9 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
     }
 }
 
+// Try to auto-complete the route as follows:
 // First try FietsrouteType.prototype.add.
-// If no success, try to auto-complete the route as follows:
+// If no success, then:
 // if a marker is selected, and one "netwerken" element is in between the knpOrNet element and the last fietsroute element,
 // also add the missing "netwerken" element
 FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {

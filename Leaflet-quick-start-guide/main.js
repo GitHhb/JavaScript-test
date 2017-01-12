@@ -6,7 +6,7 @@ var knooppuntLayer; // pdok marker layer
 var myFietsroute = new FietsrouteType();
 myFietsroute.layerStartIcon = iconFietsrouteStart;
 var myFietsrouteLayer = myFietsroute.layer; // Layer with all parts for my own fietsroute
-myFietsrouteLayer.layerLineColor = 'red';
+myFietsrouteLayer.lineColorProps = {color: 'red'};
 
 
 // the fietsroute to show on mouseover

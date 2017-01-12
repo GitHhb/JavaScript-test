@@ -1,3 +1,6 @@
+// Def constants
+var COMPARE_DISTANCE = 30; // meters, distance used to decide coordinates
+
 // Return last element of an Array
 if (! Array.prototype.last) {
     Array.prototype.last = function () {
@@ -21,7 +24,7 @@ function compareCoord(c1, c2) {
     // return c1.equals(c2);
     var dist = c1.distanceTo(c2);
     // console.log("DISTANCE: ", dist);
-    return dist < 50;
+    return dist < COMPARE_DISTANCE;
 }
 
 // var messageTag = document.getElementById("message");
