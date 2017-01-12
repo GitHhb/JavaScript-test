@@ -63,26 +63,28 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
     for (k in knooppunten) {
         i = knooppunten[k];
         // Create default knooppunt marker
-        knptMarkers.push(
-            L.marker(i.point, {riseOnHover: true}) //.bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
-        );
+        // knptMarkers.push(
+        //     L.marker(i.point, {riseOnHover: true}) //.bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
+        // );
         // Create select/deselect button for knooppunt
         knptMarkers.push(
             // L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
             L.marker(i.point, {icon: L.divIcon({
                 iconSize: [12, 12],
-                iconAnchor: [14, 65],
+                iconAnchor: [12, 12],
+                // iconAnchor: [14, 65],
                     html: "<b>" + i.nr + "</b>",
                     className: 'markerDivIcon',
                     riseOnHover: true,
-                    title: "I'm the title"
+                    title: "I'm the title", zIndexOffset: 1000
             })})
             .bindTooltip(i.nr + " " + i.name + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
                 riseOnHover: true,
                 direction: 'top',
                 opacity: 0.8,
                 offset: [-14, -55],
-                className: 'markerTooltip'
+                className: 'markerTooltip',
+                zIndexOffset: 1000
             })
             .on('click', addElementToFietsroute("knooppunt", i, myFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))

@@ -4,7 +4,10 @@ var knooppuntLayer; // pdok marker layer
 
 // the real fietsroute
 var myFietsroute = new FietsrouteType();
+myFietsroute.layerStartIcon = iconFietsrouteStart;
 var myFietsrouteLayer = myFietsroute.layer; // Layer with all parts for my own fietsroute
+myFietsrouteLayer.layerLineColor = 'red';
+
 
 // the fietsroute to show on mouseover
 var myMouseoverFietsroute = new FietsrouteType(); // used for mouseovers
@@ -42,16 +45,16 @@ var emptyLayer = L.tileLayer('');
 // knooppuntLayer = L.marker([51.49728786029085, 4.283883498524014]);
 // knooppuntLayer = L.layerGroup([markerX]);
 
-// officiele knooppunten
-var wmsKnooppuntLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
-    layers: 'knooppunten',
+// officieel netwerk
+var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
+    layers: 'netwerken',
     format: 'image/png',
     transparent: true,
 }).addTo(mymap);
 
-// officieel netwerk
-var wmsNetwerkLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
-    layers: 'netwerken',
+// officiele knooppunten
+var wmsKnooppuntLayer = L.tileLayer.wms('https://geodata.nationaalgeoregister.nl/fietsknooppuntennetwerk/ows?', {
+    layers: 'knooppunten',
     format: 'image/png',
     transparent: true,
 }).addTo(mymap);
@@ -71,8 +74,8 @@ var baseMaps = {
 var overlayMaps = {
     "Officiele Netwerken"   : wmsNetwerkLayer,
     "Officiele Knooppunten" : wmsKnooppuntLayer,
-    "Edit knooppunten"      : editKnooppuntenLayer,
     "Edit netwerken"        : editNetwerkLayer,
+    "Edit knooppunten"      : editKnooppuntenLayer,
     "Mijn Fietsroute"       : myFietsrouteLayer
     // "Knooppunten": knooppuntLayer
 }

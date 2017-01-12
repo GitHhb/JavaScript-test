@@ -55,10 +55,10 @@ var iconOrange = L.icon({
     shadowAnchor: [22, 94]
 }); 
 
-var iconRed = L.icon({
-    iconUrl: 'Image/marker-icon-red.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+var iconFietsrouteStart = L.icon({
+    iconUrl: 'Image/marker-icon-start-azure.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
     popupAnchor: [-3, -76],
     // shadowUrl: 'my-icon-shadow.png',
     shadowSize: [68, 95],
@@ -76,7 +76,7 @@ function FietsrouteElement (type, element, layer, startPoint, endPoint, cumLengt
         this.layer = layer;
     else {
         if ( type == "knooppunt" ) 
-            this.layer = L.marker(element.point, {icon: iconOrange, zIndexOffset: 1000});
+            this.layer = L.marker(element.point, {icon: iconOrange/*, zIndexOffset: 1000*/});
         else // type == "netwerken"
             this.layer = L.polyline( element.coordinateArr, {color: 'orange'} );
     }
@@ -151,11 +151,22 @@ function FietsrouteType () {
     this.matchCoords = null    ; // type L.Latlng | Coords of last element that not match an element yet, a new element must match these
     this.layerDefaultIcon;
     this.layerStartIcon;
-    this.layerEndIcon;
+    this.layerFinishIcon;
     this.layerLineColor;
 }
 
 FietsrouteType.prototype.elementFactory = function (type, element, layer, startPoint, endPoint, cumLength) {
+    if (type == "knooppunt") {
+        var marker = null;
+        if (this.length == 0) {
+            // first element of route => use start icon
+            marker = L.marker(element.point, {icon: this.layerStartIcon/*, zIndexOffset: 1000*/});
+        } else {
+            // this element will be added to the end of the route => use finish icon
+            marker = L.marker(element.point, {icon: this.layerFinishIcon/*, zIndexOffset: 1000*/});
+        }
+        return new FietsrouteElement(type, element, marker, startPoint, endPoint, cumLength);
+    }
 
 }
 
@@ -202,6 +213,7 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
         // A fietsroute must start with a "knooppunt"
         if (type == "knooppunt") {
             this.statusMessage = "Start knooppunt toegevoegd."
+            newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconFietsrouteStart, zIndexOffset: 1000});
             newMatchCoords = knpOrNet.point;
             newFietsrouteElement.endPoint = knpOrNet.point;
             // newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconRed, zIndexOffset: 1000});
