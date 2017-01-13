@@ -69,10 +69,10 @@ var iconFietsrouteStart = L.icon({
 
 var iconFietsrouteFinish = L.icon({
     iconUrl: 'Image/marker-icon-finish-flag-azure.png',
-    // iconSize: [48, 48],
-    // iconAnchor: [24, 48],
-    iconSize: [64, 64],
-    iconAnchor: [32, 64],
+    iconSize: [48, 48],
+    iconAnchor: [48, 48],
+    // iconSize: [64, 64],
+    // iconAnchor: [32, 64],
     popupAnchor: [-3, -76],
     // shadowUrl: 'my-icon-shadow.png',
     shadowSize: [68, 95],
@@ -169,10 +169,10 @@ function FietsrouteType () {
     this.lineColorProps = {color: 'orange'};
 }
 
-FietsrouteType.prototype.elementFactory = function (type, element, layer, startPoint, endPoint, cumLength) {
+FietsrouteType.prototype.layerFactory = function (type, element) {
     var knptOrLine = null;
     if (type == "knooppunt") {
-        if (this.length == 0) {
+        if (this.fietsroute.length == 0) {
             // first element of route => use start icon
             knptOrLine = L.marker(element.point, this.startIconProps);
         } else {
@@ -180,10 +180,10 @@ FietsrouteType.prototype.elementFactory = function (type, element, layer, startP
             knptOrLine = L.marker(element.point, this.finishIconProps);
         }
     } else if (type == "netwerken") {
-        knpOrLine = L.polyline( element.coordinateArr, this.lineColorProps);
+        knptOrLine = L.polyline( element.coordinateArr, this.lineColorProps);
     }
     // no valid element requested
-    return new FietsrouteElement(type, element, knptOrLine, startPoint, endPoint, cumLength);
+    return knptOrLine;
 }
 
 // // Check if an element fits onto the existing route and compute the new coords to which the next element should fit
@@ -223,13 +223,14 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
     var canAdd = false;
     var newMatchCoords;
     var newFietsrouteElement = new FietsrouteElement(type, knpOrNet, null, this.matchCoords);
+    newFietsrouteElement.layer = this.layerFactory(type, knpOrNet);
     this.statusMessage = " ";
     // Is this a new fietsroute?
     if (this.fietsroute.length == 0) {
         // A fietsroute must start with a "knooppunt"
         if (type == "knooppunt") {
             this.statusMessage = "Start knooppunt toegevoegd."
-            newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconFietsrouteStart, zIndexOffset: 1000});
+            // newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconFietsrouteStart, zIndexOffset: 1000});
             newMatchCoords = knpOrNet.point;
             newFietsrouteElement.endPoint = knpOrNet.point;
             // newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconRed, zIndexOffset: 1000});
@@ -257,7 +258,15 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
         this.matchCoords = newMatchCoords;
         this.statusMessage = type + " deel toegevoegd";
         // if (! noLayer) {myFietsrouteLayer.addLayer(newFietsrouteElement.layer);}
-        if (! noLayer) {this.layer.addLayer(newFietsrouteElement.layer);}
+        if (! noLayer) {
+            // if last element was knooppunt then update icon
+            if (this.fietsroute.length > 0 && this.fietsroute.last().type == "knooppunt") {
+                console.log("update layer: move flag");
+                // this.layer.removeLayer(this.fietsroute.last().layer);
+                // this.layer.addLayer(this.layerFactory("knooppunt", this.fietsroute.last().element));
+            }
+            this.layer.addLayer(newFietsrouteElement.layer);
+        }
         return this.fietsroute.push(newFietsrouteElement);
     }
     else {
