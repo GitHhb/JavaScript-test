@@ -169,7 +169,7 @@ function FietsrouteType () {
     this.lineColorProps = {color: 'orange'};
 }
 
-FietsrouteType.prototype.layerFactory = function (type, element) {
+FietsrouteType.prototype.layerFactoryDISABLED = function (type, element) {
     var knptOrLine = null;
     if (type == "knooppunt") {
         if (this.fietsroute.length == 0) {
@@ -182,7 +182,31 @@ FietsrouteType.prototype.layerFactory = function (type, element) {
     } else if (type == "netwerken") {
         knptOrLine = L.polyline( element.coordinateArr, this.lineColorProps);
     }
-    // no valid element requested
+    return knptOrLine;
+}
+
+// elementType = "knooppunt" | "netwerken"
+// for elementType "knooppunt": iconType = "start" | "finish" | "default"
+// for elementType "netwerken": iconType is ignored
+// element = KnooppuntType | NetwerkenType
+FietsrouteType.prototype.layerFactory = function (elementType, element, iconType) {
+    var knptOrLine = null;
+    if (elementType == "knooppunt") {
+        // if (this.fietsroute.length == 0) {
+        // } else {
+        switch (iconType) {
+            case "start":
+                knptOrLine = L.marker(element.point, this.startIconProps);
+                break;
+            case "finish":
+                knptOrLine = L.marker(element.point, this.finishIconProps);
+                break;
+            default:
+                knptOrLine = L.marker(element.point, this.defaultIconProps);
+        }
+    } else if (elementType == "netwerken") {
+        knptOrLine = L.polyline( element.coordinateArr, this.lineColorProps);
+    }
     return knptOrLine;
 }
 
@@ -223,12 +247,13 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
     var canAdd = false;
     var newMatchCoords;
     var newFietsrouteElement = new FietsrouteElement(type, knpOrNet, null, this.matchCoords);
-    newFietsrouteElement.layer = this.layerFactory(type, knpOrNet);
+    // newFietsrouteElement.layer = this.layerFactory(type, knpOrNet);
     this.statusMessage = " ";
     // Is this a new fietsroute?
     if (this.fietsroute.length == 0) {
         // A fietsroute must start with a "knooppunt"
         if (type == "knooppunt") {
+            newFietsrouteElement.layer = this.layerFactory(type, knpOrNet, "start");
             this.statusMessage = "Start knooppunt toegevoegd."
             // newFietsrouteElement.layer = L.marker(knpOrNet.point, {icon: iconFietsrouteStart, zIndexOffset: 1000});
             newMatchCoords = knpOrNet.point;
@@ -253,6 +278,7 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
         newFietsrouteElement.startPoint = returnVal.startPoint;
         newFietsrouteElement.endPoint = returnVal.endPoint;
         newFietsrouteElement.cumLength = this.fietsroute.last().cumLength + newFietsrouteElement.computeLength();
+        newFietsrouteElement.layer = this.layerFactory(type, knpOrNet, "finish");
     }
     if (canAdd) {
         this.matchCoords = newMatchCoords;
@@ -262,7 +288,8 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
             // if last element was knooppunt then update icon
             if (this.fietsroute.length > 1 && this.fietsroute.last().type == "knooppunt") {
                 console.log("update layer: move flag");
-                this.layer.removeLayer(this.fietsroute.last().layer);
+                // this.layer.removeLayer(this.fietsroute.last().layer);
+                this.updateLayer(this.fietsroute.length - 1, "default");
                 // this.layer.addLayer(this.layerFactory("knooppunt", this.fietsroute.last().element));
             }
             this.layer.addLayer(newFietsrouteElement.layer);
@@ -308,7 +335,7 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                     retval = this.add(newroute.fietsroute[j].type, newroute.fietsroute[j].element);
                 return retval;
             } // no match, remove last added element
-            newroute.deleteLast();
+            newroute.deleteLastWithLayer();
         }
     }
 
@@ -320,7 +347,7 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
 // Remove all FietsrouteElement-s from the fietsroute array starting from
 // the element with id this.name, if multiple matches the last match is taken
 // Return value: # of elements deleted
-FietsrouteType.prototype.delete = function (name) {
+FietsrouteType.prototype.deleteDISABLED = function (name) {
     // update this.matchCoords
     // compute this.matchCoords, last element of fietsroute will become the new element to match
     var routeLength = this.fietsroute.length;
@@ -360,15 +387,50 @@ FietsrouteType.prototype.delete = function (name) {
             // this.layer.removeLayer(this.fietsroute.last().layer);
             // this.removeElementFromLayer(this.fietsroute.last());
             // this.fietsroute.last().layer = this.layerFactory("knooppunt", this.fietsroute.last().element);
-            this.layer.addLayer(this.layerFactory("knooppunt", this.fietsroute.last().element));
+            this.layer.addLayer(this.layerFactory("knooppunt", this.fietsroute.last().element, "finish"));
         }
 
     // return nr of deleted elements
     return routeLength - i;
 }
 
+FietsrouteType.prototype.delete = function (name) {
+    // update this.matchCoords
+    // compute this.matchCoords, last element of fietsroute will become the new element to match
+    var routeLength = this.fietsroute.length;
+    // for (var i = 0; i < routeLength; i++) {
+    //     if ( this.fietsroute[i].element.name == name ) 
+    //         break;
+    // }
+    var i = this.findLastIndex(name);
+    // element not found
+    if ( i < 0 )
+        return i; 
+    // element found, delete element and all following elements
+    // first update status message before element containing the info we need is deleted
+    if (typeof this.fietsroute[i].type == 'undefined' ) debugger;
+    this.statusMessage = "Route vanaf " +
+        (this.fietsroute[i].type == "knooppunt"
+            ? "knooppunt " + this.fietsroute[i].element.nr
+            : this.fietsroute[i].element.name
+        )
+        + " verwijderd";
+    // start at end, so we can use deleteLastWithLayer
+    for (var j = routeLength - 1; j >= i; j--) {
+        // update layer with fietsroute
+        this.deleteLastWithLayer();
+    }
+    // // if remaining route has minimal 1 element perform administrative tasks
+    // if (i > 0)
+    //     // set this.matchCoords 
+    //     this.matchCoords = this.fietsroute.last().endPoint;
+
+    // return nr of deleted elements
+    return routeLength - i;
+}
+
 FietsrouteType.prototype.removeElementFromLayer = function (element) {
-    if (element.layer == null) return;
+    if (typeof element == 'undefined' || element.layer == null) return;
     // myFietsrouteLayer.removeLayer(element.layer);
     this.layer.removeLayer(element.layer);
 }
@@ -382,10 +444,44 @@ FietsrouteType.prototype.deleteAll = function () {
     this.statusMessage = "Fietsroute verdwijderd."
 }
 
-FietsrouteType.prototype.deleteLast = function () {
+FietsrouteType.prototype.deleteLastDISABLED = function () {
     if (this.fietsroute.length > 0) {
         this.delete(this.fietsroute.last().element.name);
     }
+}
+
+FietsrouteType.prototype.deleteLast = function () {
+    if (this.fietsroute.length == 0) return 0;
+    // remove last element from fietsroute
+    this.fietsroute.pop();
+    this.matchCoords = this.fietsroute.last().endPoint;
+    return 1;
+}
+
+FietsrouteType.prototype.deleteLastWithLayer = function () {
+    if (this.fietsroute.length == 0) return 0;
+    // the route contains at least one  element
+    this.removeElementFromLayer(this.fietsroute.last());
+    this.deleteLast();
+   
+    // if remaining route has minimal 1 element perform administrative tasks
+    if (this.fietsroute.length > 0)
+        // update marker icon
+        if (this.fietsroute.length > 1 && this.fietsroute.last().type == "knooppunt") {
+            console.log("DELETE update layer: move flag");
+            this.updateLayer(this.fietsroute.length - 1, "finish");
+        }
+
+    // return nr of deleted elements
+    return 1;
+}
+
+FietsrouteType.prototype.updateLayer = function (index, iconType) {
+    this.removeElementFromLayer(this.fietsroute[index]);
+    var newlayer =  this.layerFactory(
+        this.fietsroute[index].type, this.fietsroute[index].element, iconType);
+    this.layer.addLayer(newlayer);
+    this.fietsroute[index].layer = newlayer;
 }
 
 // Create deep clone of last Element of route and add it to end of the fietsroute of 'this'
@@ -417,6 +513,7 @@ FietsrouteType.prototype.findLastIndex = function (name) {
         if ( this.fietsroute[i].element.name == name ) 
             return i;
     }
+    return i;
 }
 
 // Redraw the layer of 'this'
