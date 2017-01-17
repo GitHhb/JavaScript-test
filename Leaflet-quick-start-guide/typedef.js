@@ -1,22 +1,24 @@
 // Knooppunten
 // Data obtained from layer "knooppunten" 
 // Knooppunt type delcaration
-function KnooppuntType (name, nr, point) {
+function KnooppuntType (name, nr, point, description) {
     this.name = name; // knooppunt name | according to Placemark id attribute
     this.nr = nr;
     this.point = point; // type L.latLng
+    this.description = description; // description exactly as in description tag of data file
 }
 
 // ___________________________________________________________________________________________
 // Netwerk onderdelen
 // Data obtained from layer "netwerken"
 // Netwerken type declaration
-function NetwerkenType (name, point, coordinateArr) {
+function NetwerkenType (name, point, coordinateArr, description) {
     this.name = name;   // network name | from kml file
     this.point = point; // type L.latLng, | denotes the network location, from kml file
     this.coordinateArr = coordinateArr; // Array of L.latLng | coordinates for this route part (polyline), from kml file
     this.first = null; // index to knooppunten array | knooppunt corresponding to first route coords, coordinateArr[0], computed
     this.last = null; // index to knooppunten array | knooppunt corresponding to last route coords, coordinateArr[length-1], computed
+    this.description = description; // description exactly as in description tag of data file
 }
 
 // Arg: latlng of type L.latLng
@@ -324,12 +326,9 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
     // newroute.add( myFietsroute.fietsroute.last().type, myFietsroute.fietsroute.last().element, true);
     newroute.copyLastElementFrom(this);
     for (let i = 0; i < netwerken.length; i++) {
-        // console.log("TRY match netwerken" + i);
         // element is of type "knooppunt", do a dryrun add to check if this "netwerken" element can be added
         if (newroute.add("netwerken", netwerken[i], true) > 0) {
-        // console.log("FOUND match netwerken" + i);
             if (newroute.add("knooppunt", knpOrNet, true) > 0) {
-        // console.log("FOUND match KNOOPPUNT" + i);
                 // Match found, add elements to "this"
                 for (let j = 1; j < newroute.fietsroute.length; j++)
                     retval = this.add(newroute.fietsroute[j].type, newroute.fietsroute[j].element);
@@ -394,17 +393,14 @@ FietsrouteType.prototype.deleteDISABLED = function (name) {
     return routeLength - i;
 }
 
+// Delete route from end up to last occurrence of element with name equal to name
 FietsrouteType.prototype.delete = function (name) {
     // update this.matchCoords
     // compute this.matchCoords, last element of fietsroute will become the new element to match
     var routeLength = this.fietsroute.length;
-    // for (var i = 0; i < routeLength; i++) {
-    //     if ( this.fietsroute[i].element.name == name ) 
-    //         break;
-    // }
     var i = this.findLastIndex(name);
-    // element not found
     if ( i < 0 )
+    // element not found
         return i; 
     // element found, delete element and all following elements
     // first update status message before element containing the info we need is deleted
@@ -420,10 +416,6 @@ FietsrouteType.prototype.delete = function (name) {
         // update layer with fietsroute
         this.deleteLastWithLayer();
     }
-    // // if remaining route has minimal 1 element perform administrative tasks
-    // if (i > 0)
-    //     // set this.matchCoords 
-    //     this.matchCoords = this.fietsroute.last().endPoint;
 
     // return nr of deleted elements
     return routeLength - i;

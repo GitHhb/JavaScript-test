@@ -70,11 +70,13 @@ function extractKnooppunten (xmlDoc) {
     for (var i = 0; i < x.length; i++) {
         var name = x[i].getAttribute("id");
         // Tag "name" marks the knooppuntnr
-        var knptNr = x[i].getElementsByTagName("name")[0].textContent;
+        var nr = x[i].getElementsByTagName("name")[0].textContent;
+        // Tag "description" marks the description
+        var description = x[i].getElementsByTagName("description")[0].textContent;
         // Tag "coordinates" marks the coordinates
         var knptArr = x[i].getElementsByTagName("coordinates")[0].textContent.split(',');
-        var pointCoord = L.latLng(knptArr[1], knptArr[0]);
-        knooppunten.push(new KnooppuntType(name, knptNr, pointCoord));
+        var point = L.latLng(knptArr[1], knptArr[0]);
+        knooppunten.push(new KnooppuntType(name, nr, point, description));
         // console.log(knptCoords[1] + ", " + knptCoords[0]);
     }
     // var mydoc = document.getElementById("mapdata");
@@ -86,20 +88,22 @@ function extractNetwerken (xmlDoc) {
     var x = xmlDoc.getElementsByTagName("Placemark");
     // Store every route part in the "netwerken" array
     for (var i = 0; i < x.length; i++) {
-        var netwerkLineString = []; // LineString of netwerken coords
+        var coordinateArr = []; // LineString of netwerken coords
         // Tag "name" marks the netwerk name
-        var netwerkName = x[i].getElementsByTagName("name")[0].textContent;
+        var name = x[i].getElementsByTagName("name")[0].textContent;
+        // Tag "description" marks the description
+        var description = x[i].getElementsByTagName("description")[0].textContent;
         // Tag "Point > coordinates" marks the Point coordinates
         var pointArr = x[i].getElementsByTagName("Point")[0].getElementsByTagName("coordinates")[0].textContent.split(',');
-        var pointCoord = L.latLng(pointArr[1], pointArr[0]);
+        var point = L.latLng(pointArr[1], pointArr[0]);
         // Tag "LineString > coordinates" marks the route coordinates
-        var lineCoordArr = x[i].getElementsByTagName("LineString")[0].getElementsByTagName("coordinates")[0].textContent.split(' ');
-        // console.log("NETWERKEN", lineCoordArr);
-        for (var j = 0; j < lineCoordArr.length; j++) {
-            var s = lineCoordArr[j].split(',');
-            netwerkLineString.push(L.latLng(s[1], s[0]));
+        var fromXmlCoordArr = x[i].getElementsByTagName("LineString")[0].getElementsByTagName("coordinates")[0].textContent.split(' ');
+        // console.log("NETWERKEN", fromXmlCoordArr);
+        for (var j = 0; j < fromXmlCoordArr.length; j++) {
+            var s = fromXmlCoordArr[j].split(',');
+            coordinateArr.push(L.latLng(s[1], s[0]));
         }
-        netwerken.push(new NetwerkenType(netwerkName, pointCoord, netwerkLineString));
+        netwerken.push(new NetwerkenType(name, point, coordinateArr, description));
         // console.log(knptCoords[1] + ", " + knptCoords[0]);
     }
     // var mydoc = document.getElementById("mapdata");

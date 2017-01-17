@@ -11,7 +11,7 @@ var myFietsrouteLayer = myFietsroute.layer; // Layer with all parts for my own f
 // the fietsroute to show on mouseover
 var myMouseoverFietsroute = new FietsrouteType(); // used for mouseovers
 var myMouseoverFietsrouteLayer = myMouseoverFietsroute.layer;
-myMouseoverFietsroute.lineColorProps = {color: 'blue', dashArray: "10, 10", weight: 4};
+myMouseoverFietsroute.lineColorProps = {color: 'blue', dashArray: "8, 8, 1, 8", weight: 2};
 
 
 var messageTag = document.getElementById("message");

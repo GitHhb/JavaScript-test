@@ -22,7 +22,7 @@ var mouseoverAddElementToFietsroute = function (type, element, fietsroute) {
             fietsroute.copyLastElementFrom(myFietsroute);
             // fietsroute now has 1 element, equal to last element of existing route
             // don't create a layer for this so we won't overwrite the existing one 
-            fietsroute.fietsroute.last().layer = null;
+            // fietsroute.fietsroute.last().layer = null;
         }
         fietsroute.addRouteUptoMarker(type, element);
         // myFietsroute.redrawLayer(myFietsrouteLayer);
@@ -70,21 +70,24 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
         knptMarkers.push(
             // L.marker(i.point).bindPopup(i.nr + "<br>(" + i.point.lat + ", " + i.point.lng + ")")
             L.marker(i.point, {icon: L.divIcon({
-                iconSize: [12, 12],
-                iconAnchor: [14, 14],
-                // iconAnchor: [14, 65],
+                    iconSize: [12, 12],
+                    iconAnchor: [14, 14],
+                    // iconAnchor: [14, 65],
                     html: "<b>" + i.nr + "</b>",
                     className: 'markerDivIcon',
-                    riseOnHover: true,
-                    title: "I'm the title", zIndexOffset: 1000
-            })})
-            .bindTooltip(i.nr + " " + i.name + "<br>(" + i.point.lat + ", " + i.point.lng + ")", {
+                    title: "I'm the title",
+                }),
+                riseOnHover: true,
+                zIndexOffset: 1000
+            })
+            .bindTooltip("<h3>Knooppunt: " + i.nr + "</h3><b>Naam: </b>" + i.name + "<br><b>Locatie: </b>" + i.point.lat + ", " + i.point.lng, {
+            // .bindTooltip(i.description, {
                 riseOnHover: true,
                 direction: 'top',
                 opacity: 0.8,
-                offset: [-14, -55],
+                offset: [0, -55],
                 className: 'markerTooltip',
-                zIndexOffset: 1000
+                zIndexOffset: -1000
             })
             .on('click', addElementToFietsroute("knooppunt", i, myFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
@@ -107,16 +110,19 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
                     // html: "<i>" + i.name.split('.')[1] + "</i>",
                     className: 'netwerkDivIcon',
                     iconAnchor: [9, 9],
-                    riseOnHover: true,
                     title: "I'm the title",
                     offset: [-5, -5]
-                })})
+                }),
+                riseOnHover: true,
+                zIndexOffset: 900
+            })
             .bindTooltip(
-                i.name + "<br>(End1: " + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + ")<br>End2: "
-                + i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng + ")", {
+                "<h3>Netwerkdeel: " + i.name + "</h3><b>Eindpunt 1: </b>" + i.coordinateArr[0].lat + ", " + i.coordinateArr[0].lng + "<br>"
+                + "<b>Eindpunt 2: </b>" + i.coordinateArr[i.coordinateArr.length-1].lat + ", " + i.coordinateArr[i.coordinateArr.length-1].lng, {
+                // i.description, {
                     direction: 'top',
                     opacity: 0.8,
-                    offset: [5, -5]
+                    offset: [0, -8]
                 }
             )
             .on('click', addElementToFietsroute("netwerken", i, myFietsroute))
