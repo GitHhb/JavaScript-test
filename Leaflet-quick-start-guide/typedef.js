@@ -27,6 +27,35 @@ function NetwerkenType (name, point, coordinateArr, description) {
         || compareCoord(this.coordinateArr.last(), latlng); 
 }
 
+// create associative array of netwerken, so we can easily match route coords
+createNetwerkenHash = function (netwerken) {
+    var netwerkenHash = {};
+    for (let i = 0; i < netwerken.length; i++ ) {
+        // INIT fields: first and last
+        netwerken[i].first = netwerken[i].coordinateArr[0];
+        netwerken[i].last = netwerken[i].coordinateArr[netwerken[i].coordinateArr.length-1];
+        if (typeof netwerkenHash[netwerken[i].first.toString(20)] == 'undefined' )
+            netwerkenHash[netwerken[i].first.toString(20)] = [ netwerken[i] ];
+        else
+            netwerkenHash[netwerken[i].first.toString(20)].push( netwerken[i] );
+        if (typeof netwerkenHash[netwerken[i].last.toString(20)] == 'undefined' )
+            netwerkenHash[netwerken[i].last.toString(20)] = [ netwerken[i] ];
+        else
+            netwerkenHash[netwerken[i].last.toString(20)].push( netwerken[i] );
+        // netwerkenH[netwerken[i].last.toString()].push( netwerken[i] );
+            // // index element first should be lexicographically < index element last
+            // if (netwerken[i].first.toString() > netwerken[i].last.toString()) {
+            //     // swap first and last
+            //     let tmp =  netwerken[i].first;
+            //     netwerken[i].first = netwerken[i].last;
+            //     netwerken[i].last = tmp;
+            // }
+            // // now lexicographically first < last 
+            // netwerkenH[netwerken[i].first.toString() + netwerken[i].last.toString()] = netwerken[i];
+    }
+    return netwerkenHash;
+}
+
 // ___________________________________________________________________________________________
 // Netwerk parts from knooppunt to knooppunt
 // Constructed by us
@@ -309,7 +338,9 @@ FietsrouteType.prototype.add = function (type, knpOrNet, noLayer) {
 // If no success, then:
 // if a marker is selected, and one "netwerken" element is in between the knpOrNet element and the last fietsroute element,
 // also add the missing "netwerken" element
-FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
+// Arg: type = "knooppunt" | "netwerken"
+//      knpOrNet = KnooppuntType | NetwerkenType
+FietsrouteType.prototype.addRouteUptoMarkerORG = function (type, knpOrNet) {
     var retval;
     // if the knpOrNet directly fits onto the existing route, we're done
     if ( (retval = this.add(type, knpOrNet)) > 0) {
@@ -337,7 +368,99 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
             newroute.deleteLastWithLayer();
         }
     }
+    // if (this.fietsroute.last().element.type == "netwerken") {
+    //     return retval;
+    // }  
+}
 
+// Arg: type = "knooppunt" | "netwerken"
+//      knpOrNet = KnooppuntType | NetwerkenType
+FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
+    var newroute = new FietsrouteType();
+    var retval;
+        // create associative array of netwerken, so we can easily match route coords
+        // var netwerkenH = {};
+        // for (let i = 0; i < netwerken.length; i++ ) {
+        //     // INIT fields: first and last
+        //     netwerken[i].first = netwerken[i].coordinateArr[0];
+        //     netwerken[i].last = netwerken[i].coordinateArr[netwerken[i].coordinateArr.length-1];
+        //     if (typeof netwerkenH[netwerken[i].first.toString()] == 'undefined' )
+        //         netwerkenH[netwerken[i].first.toString()] = [ netwerken[i] ];
+        //     else
+        //         netwerkenH[netwerken[i].first.toString()].push( netwerken[i] );
+        //     if (typeof netwerkenH[netwerken[i].last.toString()] == 'undefined' )
+        //         netwerkenH[netwerken[i].last.toString()] = [ netwerken[i] ];
+        //     else
+        //         netwerkenH[netwerken[i].last.toString()].push( netwerken[i] );
+        //     // netwerkenH[netwerken[i].last.toString()].push( netwerken[i] );
+        //         // // index element first should be lexicographically < index element last
+        //         // if (netwerken[i].first.toString() > netwerken[i].last.toString()) {
+        //         //     // swap first and last
+        //         //     let tmp =  netwerken[i].first;
+        //         //     netwerken[i].first = netwerken[i].last;
+        //         //     netwerken[i].last = tmp;
+        //         // }
+        //         // // now lexicographically first < last 
+        //         // netwerkenH[netwerken[i].first.toString() + netwerken[i].last.toString()] = netwerken[i];
+        // }
+    var cnt = 0;
+    for (let i in netwerkenH) {
+        console.log(i + " ==> " + netwerkenH[i].length);
+        cnt++;
+    }
+    console.log("LENGTH ==> " + cnt)
+    console.log("KNOOPPUNT: ", knpOrNet.nr);
+    console.log("VALUE ", netwerkenH[knpOrNet.point.toString(20)]);
+    for (let i in netwerkenH[knpOrNet.point.toString(20)])
+        console.log(i);
+    // return;
+
+    function tryElement(route) {
+        // check if we found a route upto "knpOrNet"
+        var retval;
+        if ( (retval = route.add(type, knpOrNet,true)) > 0) {
+            // route to knpOrNet found
+            return retval;
+        } else {
+            // check all matching "netwerken" parts
+            for (let i = 0; i < netwerkenH[route.matchCoords.toString(20)].length; i++) {
+                if (route.add("netwerken", netwerkenH[route.matchCoords.toString(20)][i], true) < 0)
+                    console.log("Unexpected error in tryElement");
+                if (retval = tryElement(route) > 0)
+                    return retval;
+                route.deleteLast();
+                // route.deleteLastWithLayer();
+            }
+        }
+    }
+
+    if (tryElement(this) > 0 ) console.log("Route found");
+    else console.log("NO route  found");
+    // Match found, add elements to "this"
+    for (let j = 1; j < newroute.fietsroute.length; j++)
+        retval = this.add(newroute.fietsroute[j].type, newroute.fietsroute[j].element);
+    return retval;
+    
+    
+    // the new knpOrNet does not fit directly,
+    // so try to find a route that connects this marker with the rest of the route
+    // Check if a "netwerken" element matches the last added element 
+    // create a fietsroute for testing different routes (do not add to layer)
+    var newroute = new FietsrouteType();
+    // newroute.add( myFietsroute.fietsroute.last().type, myFietsroute.fietsroute.last().element, true);
+    newroute.copyLastElementFrom(this);
+    for (let i = 0; i < netwerken.length; i++) {
+        // element is of type "knooppunt", do a dryrun add to check if this "netwerken" element can be added
+        if (newroute.addRouteUptoMarker("netwerken", netwerken[i], true) > 0) {
+            if (newroute.add("knooppunt", knpOrNet, true) > 0) {
+                // Match found, add elements to "this"
+                for (let j = 1; j < newroute.fietsroute.length; j++)
+                    retval = this.add(newroute.fietsroute[j].type, newroute.fietsroute[j].element);
+                return retval;
+            } // no match, remove last added element
+            newroute.deleteLastWithLayer();
+        }
+    }
     // if (this.fietsroute.last().element.type == "netwerken") {
     //     return retval;
     // }  

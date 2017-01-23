@@ -1,6 +1,7 @@
 var knooppunten = []; // Array of type KnooppuntType
 var knooppuntenLoaded = false;
 var netwerken = []; // Array of type NetwerkenType
+var netwerkenH;     // Hash of NetwerkenType with coords as key
 var netwerkenLoaded = false;
 
 
@@ -104,6 +105,8 @@ function extractNetwerken (xmlDoc) {
             coordinateArr.push(L.latLng(s[1], s[0]));
         }
         netwerken.push(new NetwerkenType(name, point, coordinateArr, description));
+        // INIT netwerken Hash
+        netwerkenH = createNetwerkenHash(netwerken);
         // console.log(knptCoords[1] + ", " + knptCoords[0]);
     }
     // var mydoc = document.getElementById("mapdata");
