@@ -16,17 +16,43 @@
         console.log(i);
     }
 
-    var loc1 = L.latLng(0.0000, 0.0000);
-    var loc2 = L.latLng(0.0001, 0.0001);
-    console.log( loc1.distanceTo(loc2) );
+    function hup (a) {
+        a.nr = a.nr + 1;
+    }
 
-    var loc1 = L.latLng(51.0000, 4.0000);
-    var loc2 = L.latLng(51.0001, 4.0001);
-    console.log( loc1.distanceTo(loc2) );
-    console.log("key: ", loc1.toString(5))
-    console.log("key: ", loc2.toString())
-    var offset = 0.000005;
-    console.log("key: ", L.latLng(loc2.lat + offset, loc2.lng + offset).toString(5) )
+    var b = {nr: 3};
+    console.log(b.nr);
+    b.nr = b.nr + 1;
+    console.log(b.nr);
+    hup(b);
+    console.log(b.nr);
+    
+    // var loc1 = L.latLng(0.0000, 0.0000);
+    // var loc2 = L.latLng(0.0001, 0.0001);
+    // console.log( loc1.distanceTo(loc2) );
+
+    // var loc1 = L.latLng(51.0000, 4.0000);
+    // var loc2 = L.latLng(51.0001, 4.0001);
+    // console.log( loc1.distanceTo(loc2) );
+    // console.log("key: ", loc1.toString(5))
+    // console.log("key: ", loc2.toString())
+    // var offset = 0.000005;
+    // console.log("key: ", L.latLng(loc2.lat + offset, loc2.lng + offset).toString(5) )
+
+
+
+    class myOwnMarker extends L.Marker {
+        constructor (speed) {
+            super();
+            this.speed = speed;
+        }
+    };
+    var moi = new myOwnMarker(20);
+    moi.setLatLng([50, 4]);
+    console.log("class myOwnMarker", typeof moi, moi.getLatLng(), moi);
+    console.log("XXX ", L.Marker.constructor);
+    console.log("XXX ", moi instanceof L.Marker);
+    console.log("XXX ", moi instanceof myOwnMarker);
 
     // var newobj = {a: "vierde", d: "vijfde"};
     

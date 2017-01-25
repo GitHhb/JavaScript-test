@@ -395,14 +395,17 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
         //     console.log(i);
         // // return;
 
+    // Find shortest route from "route" to "knpOrNet"
     // FietsrouteType route: route found so far
     // Integer maxdistance : maximum for new route we are searching for
     function createRouteTo(route, maxdistance) {
+        // Just show route for debugging
         if (route.fietsroute.length > 0) {
              console.log("==== TRYING => ", route.fietsroute.last().cumLength, maxdistance);
              let txt = route.fietsroute.reduce( (txt, a) => txt += a.element.name + " - ",  "==== Route  => ");
              console.log(txt);
         }
+
         // check if we found a route upto "knpOrNet"
         var retval;
         if ( (retval = route.add(type, knpOrNet,true)) > 0) {
@@ -412,8 +415,10 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                 route.deleteLast();
                 return -1;
             }
-            // route to knpOrNet found
-            return retval;
+            // shortest route to knpOrNet found
+            // save route
+            // return length
+            return route.fietsroute.last().cumLength;
         } else {
             // check all matching "netwerken" parts
             for (let i = 0; i < netwerkenH[route.matchCoords.toString(20)].length; i++) {
