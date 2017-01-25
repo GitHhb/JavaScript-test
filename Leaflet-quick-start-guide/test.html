@@ -1,13 +1,65 @@
 <!doctype html>
 <body>
+    <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
     <script>
     var arr = [];
-    function Atype () {
-        this.value = 1;
+    var obj = [{a: "eerste"}, {a: "tweede"}, {a: "eerste"}];
+
+    for (let i in obj) {
+        console.log("key: " + i + " - value: " + obj[i].a);
+        arr[obj[i].a] = obj[i];
     }
-    var x = new Atype;
-    console.log(x);
-    var y = new Atype();
-    console.log(y);
+
+    console.log("===========");
+
+    for (let i in arr) {
+        console.log(i);
+    }
+
+    var loc1 = L.latLng(0.0000, 0.0000);
+    var loc2 = L.latLng(0.0001, 0.0001);
+    console.log( loc1.distanceTo(loc2) );
+
+    var loc1 = L.latLng(51.0000, 4.0000);
+    var loc2 = L.latLng(51.0001, 4.0001);
+    console.log( loc1.distanceTo(loc2) );
+    console.log("key: ", loc1.toString(5))
+    console.log("key: ", loc2.toString())
+    var offset = 0.000005;
+    console.log("key: ", L.latLng(loc2.lat + offset, loc2.lng + offset).toString(5) )
+
+    // var newobj = {a: "vierde", d: "vijfde"};
+    
+    // for (let k in newobj) {
+    //     if (! obj.hasOwnProperty(k)) {
+    //         console.log("NEW object")
+    //         console.log("key: " + k + " - value: " + newobj[k]);
+    //         obj[k] = newobj[k];
+    //     } else {
+    //         console.log("EXISTING object")
+    //         console.log("key: " + k + " - value: " + newobj[k]);
+
+    //     }
+    // }
+
+    // for (let i in obj) {
+    //     console.log("key: " + i + " - value: " + obj[i]);
+    // }
+
+    // function Atype (n) {
+    //     this.value = n;
+    // }
+    // var x = new Atype(1);
+    // console.log(x);
+    // var y = new Atype(3);
+    // console.log(y);
+    // add(arr, x);
+    // console.log(arr);
+    // add(arr, y);
+    // console.log(arr);
+
+    // function add (array, x) {
+    //     array.push(x);
+    // }
     </script>
 </body>
