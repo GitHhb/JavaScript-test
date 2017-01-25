@@ -382,53 +382,34 @@ FietsrouteType.prototype.addRouteUptoMarkerORG = function (type, knpOrNet) {
 FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
     var newroute = new FietsrouteType();
     var retval;
-        // create associative array of netwerken, so we can easily match route coords
-        // var netwerkenH = {};
-        // for (let i = 0; i < netwerken.length; i++ ) {
-        //     // INIT fields: first and last
-        //     netwerken[i].first = netwerken[i].coordinateArr[0];
-        //     netwerken[i].last = netwerken[i].coordinateArr[netwerken[i].coordinateArr.length-1];
-        //     if (typeof netwerkenH[netwerken[i].first.toString()] == 'undefined' )
-        //         netwerkenH[netwerken[i].first.toString()] = [ netwerken[i] ];
-        //     else
-        //         netwerkenH[netwerken[i].first.toString()].push( netwerken[i] );
-        //     if (typeof netwerkenH[netwerken[i].last.toString()] == 'undefined' )
-        //         netwerkenH[netwerken[i].last.toString()] = [ netwerken[i] ];
-        //     else
-        //         netwerkenH[netwerken[i].last.toString()].push( netwerken[i] );
-        //     // netwerkenH[netwerken[i].last.toString()].push( netwerken[i] );
-        //         // // index element first should be lexicographically < index element last
-        //         // if (netwerken[i].first.toString() > netwerken[i].last.toString()) {
-        //         //     // swap first and last
-        //         //     let tmp =  netwerken[i].first;
-        //         //     netwerken[i].first = netwerken[i].last;
-        //         //     netwerken[i].last = tmp;
-        //         // }
-        //         // // now lexicographically first < last 
-        //         // netwerkenH[netwerken[i].first.toString() + netwerken[i].last.toString()] = netwerken[i];
+    
+        // var cnt = 0;
+        // for (let i in netwerkenH) {
+        //     console.log(i + " ==> " + netwerkenH[i].length);
+        //     cnt++;
         // }
-    var cnt = 0;
-    for (let i in netwerkenH) {
-        console.log(i + " ==> " + netwerkenH[i].length);
-        cnt++;
-    }
-    console.log("LENGTH ==> " + cnt)
-    console.log("KNOOPPUNT: ", knpOrNet.nr);
-    console.log("VALUE ", netwerkenH[knpOrNet.point.toString(20)]);
-    for (let i in netwerkenH[knpOrNet.point.toString(20)])
-        console.log(i);
-    // return;
+        // console.log("LENGTH ==> " + cnt)
+        // console.log("KNOOPPUNT: ", knpOrNet.nr);
+        // console.log("VALUE ", netwerkenH[knpOrNet.point.toString(20)]);
+        // for (let i in netwerkenH[knpOrNet.point.toString(20)])
+        //     console.log(i);
+        // // return;
 
     // FietsrouteType route: route found so far
     // Integer maxdistance : maximum for new route we are searching for
-    function tryElement(route, maxdistance) {
-
+    function createRouteTo(route, maxdistance) {
+        if (route.fietsroute.length > 0) {
+             console.log("==== TRYING => ", route.fietsroute.last().cumLength, maxdistance);
+             let txt = route.fietsroute.reduce( (txt, a) => txt += a.element.name + " - ",  "==== Route  => ");
+             console.log(txt);
+        }
         // check if we found a route upto "knpOrNet"
         var retval;
-        if ( (retval = route.add(type, knpOrNet,false)) > 0) {
-            console.log("Route found, distance: " + route.cumLength);
+        if ( (retval = route.add(type, knpOrNet,true)) > 0) {
+            console.log("Route found, distance: " + route.fietsroute.last().cumLength);
             // if route too long skip
             if (route.fietsroute.last().cumLength > maxdistance) {
+                route.deleteLast();
                 return -1;
             }
             // route to knpOrNet found
@@ -438,17 +419,23 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
             for (let i = 0; i < netwerkenH[route.matchCoords.toString(20)].length; i++) {
                 // if the route already passed this point, stop to prevent looping
                 if (route.contains(netwerkenH[route.matchCoords.toString(20)][i].name)) {
+                    // skip this element
                     console.log("STOP looping");
                     continue;
                 }
-                if (route.add("netwerken", netwerkenH[route.matchCoords.toString(20)][i], false) < 0)
-                    console.log("Unexpected error in tryElement");
-                retval = tryElement(route);
-                // wait(500);
-                if (retval > 0)
-                    return retval;
-                route.deleteLast();
-                // route.deleteLastWithLayer();
+                if (route.add("netwerken", netwerkenH[route.matchCoords.toString(20)][i], false) < 0) {
+                    console.log("Unexpected error in createRouteTo");
+                    continue;
+                }
+                // successfully added route element
+                if (route.fietsroute.last().cumLength < maxdistance) {
+                    retval = createRouteTo(route, maxdistance);
+                    // wait(500);
+                    if (retval > 0)
+                        return retval;
+                }
+                // route.deleteLast();
+                route.deleteLastWithLayer();
             }
         }
     }
@@ -458,8 +445,9 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                         this.fietsroute.last().element.point.distanceTo(knpOrNet.point) * 5
                   )
 
-    if (tryElement(this, maxDist) > 0 ) console.log("Route found");
+    if (createRouteTo(this, maxDist) > 0 ) console.log("Route found");
     else console.log("NO route  found");
+    console.log("=====================================");
     // Match found, add elements to "this"
     for (let j = 1; j < newroute.fietsroute.length; j++)
         retval = this.add(newroute.fietsroute[j].type, newroute.fietsroute[j].element);
