@@ -32,7 +32,7 @@ var baselayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
 // If initial value of zoom too low then no kml data will be loaded 
 mymap = L.map('mapid', {
     center: [51.497469, 4.271493],
-    zoom: 12,
+    zoom: 14,
     layers: [baselayer]
 });
 
