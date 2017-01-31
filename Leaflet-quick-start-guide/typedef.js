@@ -465,7 +465,7 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                 } else
                     routeLog += "NOK TOO long<br>";
                 // route.deleteLast();
-                routeLog += "DELETE " + netwerkenH[route.matchCoords.toString(20)][i].name + "<br>";
+                // routeLog += "DELETE " + netwerkenH[route.matchCoords.toString(20)][i].name + "<br>";
                 route.deleteLastWithLayer();
                 routeLog += "AFTER DELETE<br>" + getRoute(route);
             }
