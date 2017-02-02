@@ -430,8 +430,6 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
             shortestRoute.deleteAll();
             // copyFietsroute(0, route, shortestRoute);
             route.addFietsroute(0, shortestRoute);
-            // set length of shortest route
-            maxdistance.len = route.fietsroute.last().cumLength;
         // console.log("FOUND SHORTEST route length: " + maxdistance.len, printRoute(route), printRoute(shortestRoute));
             routeLog += "FOUND ROUTE length: " + route.fietsroute.last().cumLength + "<br>"
                       + "------------max   : " + maxdistance.len + "<br>" +
@@ -439,6 +437,9 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
             console.log("");
             // delete last element
             route.deleteLastWithLayer();
+            // set length of shortest route
+            // we're working with route length TO this element, so don't include this routelement in length
+            maxdistance.len = route.fietsroute.last().cumLength;
             // return length
             return maxdistance.len;
         } else {
