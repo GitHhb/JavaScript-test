@@ -3,9 +3,11 @@ var netwerkK2K = []; // Array of type NetwerkK2K
 // Args: type = "knooppunt" | "netwerken"
 //       fietsroute: of type FietsrouteType
 // Return: updated fietsroute or user message with reason that update is not possible
-var addElementToFietsroute = function (type, element, fietsroute) {
+var addElementToFietsroute = function (type, element, fietsroute, copyFromRoute) {
     return function (e) {
-        fietsroute.addRouteUptoMarker(type, element);
+        // fietsroute.addRouteUptoMarker(type, element); <== computes route again, overkill
+        // if no fietsroute exists, copy single element from copyFromRoute, else copy only new elements (thus index > 1)
+        copyFromRoute.addFietsroute((fietsroute.fietsroute.length > 0 ? 1 : 0), fietsroute);
         // myFietsroute.redrawLayer(myFietsrouteLayer);
         showMessage(fietsroute.statusMessage);
         toonMijnRoute(htmlMijnRoute);
@@ -89,7 +91,7 @@ function addToKnooppuntenLayerGroup (knooppunten, knptLayerGroup) {
                 className: 'markerTooltip',
                 zIndexOffset: -1000
             })
-            .on('click', addElementToFietsroute("knooppunt", i, myFietsroute))
+            .on('click', addElementToFietsroute("knooppunt", i, myFietsroute, myMouseoverFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
             .on('mouseover', mouseoverAddElementToFietsroute("knooppunt", i, myMouseoverFietsroute))
             .on('mouseout', mouseoutDeleteElementFromFietsroute(i, myMouseoverFietsroute))
@@ -125,7 +127,7 @@ function addToNetwerkenLayerGroup (netwerken, networkLayerGroup) {
                     offset: [0, -8]
                 }
             )
-            .on('click', addElementToFietsroute("netwerken", i, myFietsroute))
+            .on('click', addElementToFietsroute("netwerken", i, myFietsroute, myMouseoverFietsroute))
             .on('contextmenu', deleteElementFromFietsroute(i.name, myFietsroute))
             .on('mouseover', mouseoverAddElementToFietsroute("netwerken", i, myMouseoverFietsroute))
             .on('mouseout', mouseoutDeleteElementFromFietsroute(i, myMouseoverFietsroute))

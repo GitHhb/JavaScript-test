@@ -57,6 +57,12 @@ createNetwerkenHash = function (netwerken) {
             // // now lexicographically first < last 
             // netwerkenH[netwerken[i].first.toString() + netwerken[i].last.toString()] = netwerken[i];
     }
+    // var cnt = 0;
+    // for (i in netwerkenHash) {
+    //     console.log(i, netwerkenHash[i]);
+    //     cnt++;
+    // }
+    // console.log("Total hash count member: " +cnt);
     return netwerkenHash;
 }
 
@@ -245,6 +251,13 @@ FietsrouteType.prototype.layerFactory = function (elementType, element, iconType
     return knptOrLine;
 }
 
+// Add fietsroute from "this" to "toRoute"
+// Append fietsroute in "this.fietsroute" starting at index "fromIndex" to end of "routeTo.fietsroute"
+FietsrouteType.prototype.addFietsroute = function (fromIndex, toRoute) {
+    for (let j = fromIndex; j < this.fietsroute.length; j++)
+        toRoute.add(this.fietsroute[j].type, this.fietsroute[j].element);
+}
+
 // Add a new MyFietsrouteElement element to the fietsroute, only if the coords of the last element match with those of the new element
 // Arg: type = "knooppunt" | "netwerken"
 //      knpOrNet = KnooppuntType | NetwerkenType
@@ -360,6 +373,10 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
     tryRoute.lineColorProps = {color: 'red', dashArray: "8, 8", weight: 2};
     var retval;
     var shortestRoute = new FietsrouteType(); // shortest route we found
+    shortestRoute.layer = this.layer;
+    shortestRoute.lineColorProps = {color: 'yellow', dashArray: "8, 8", weight: 2};
+
+    var routeLog = "";
 
     
         // var cnt = 0;
@@ -374,73 +391,105 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
         //     console.log(i);
         // // return;
 
+    if (this.fietsroute.length == 0) {
+        // no previous route yet, just add the selected element
+        return this.add(type, knpOrNet, false);
+    }
+    // continue as there is an existing route
+
+    // Just show route for debugging
+    function getRoute(route) {
+        if (route.fietsroute.length > 0) {
+            let txt = "==== route length => " + route.fietsroute.last().cumLength + "<br>";
+            txt += route.fietsroute.reduce( (txt, a) => txt += a.element.name + " - ",  "==== Route  => ");
+            return txt + "<br>";
+        }
+    }
+
+    var depth = 0;
     // Find shortest route from "route" to "knpOrNet"
+    // As "knpOrNet" is the target, it is not included in the length of route computation
     // FietsrouteType route: route found so far
     // Integer maxdistance : maximum for new route we are searching for
     function createRouteTo(route, maxdistance) {
-        // // Just show route for debugging
-        // if (route.fietsroute.length > 0) {
-        //      console.log("==== TRYING => ", route.fietsroute.last().cumLength, maxdistance.len);
-        //      let txt = route.fietsroute.reduce( (txt, a) => txt += a.element.name + " - ",  "==== Route  => ");
-        //      console.log(txt);
-        // }
-
+        depth++;
+        routeLog += "DEPTH " + depth + "<br>";
         // check if we found a route upto "knpOrNet"
         var retval;
-        if ( (retval = route.add(type, knpOrNet, false)) > 0) {
-            console.log("Route found, distance: " + route.fietsroute.last().cumLength);
+        if ( (retval = route.add(type, knpOrNet, true)) > 0) {
+            console.log("Route found, distance: " + route.fietsroute.last().cumLength + " MAXdistance: " + maxdistance.len);
             // if route too long skip
-            if (route.fietsroute.last().cumLength > maxdistance) {
-                route.deleteLast();
-                return -1;
-            }
+            // if (route.fietsroute.last().cumLength > maxdistance.len) {
+            //     route.deleteLast();
+            //     return -1;
+            // }
             // shortest route to knpOrNet found
+            if (shortestRoute.fietsroute.length > 0)
+                console.log("PREVIOUS shortest route LENGTH: " + shortestRoute.fietsroute.last().cumLength);
             // save route
             shortestRoute.deleteAll();
-            copyFietsroute(0, route, shortestRoute);
+            // copyFietsroute(0, route, shortestRoute);
+            route.addFietsroute(0, shortestRoute);
+        // console.log("FOUND SHORTEST route length: " + maxdistance.len, printRoute(route), printRoute(shortestRoute));
+            routeLog += "FOUND ROUTE length: " + route.fietsroute.last().cumLength + "<br>"
+                      + "------------max   : " + maxdistance.len + "<br>" +
+                      + "--------------------" + getRoute(route) + "<br>";
+            console.log("");
+            // delete last element
+            route.deleteLastWithLayer();
             // set length of shortest route
+            // we're working with route length TO this element, so don't include this routelement in length
             maxdistance.len = route.fietsroute.last().cumLength;
-            console.log("FOUND length: " + maxdistance.len, shortestRoute);
             // return length
             return maxdistance.len;
         } else {
             // check all matching "netwerken" parts
             // console.log("TRY branches: ", netwerkenH[route.matchCoords.toString(20)]);
+        // console.log("+++++ START LOOP ________________________");
             for (let i = 0; i < netwerkenH[route.matchCoords.toString(20)].length; i++) {
+                routeLog += "TRY " + netwerkenH[route.matchCoords.toString(20)][i].name + "<br>";
+        // console.log("    TRY branch: " + netwerkenH[route.matchCoords.toString(20)][i].name);
+        // printRoute(route);
+        // console.log("_________________________");
                 // if the route already passed this point, stop to prevent looping
-                if (route.contains(netwerkenH[route.matchCoords.toString(20)][i].name)) {
+                if (route.contains(netwerkenH[route.matchCoords.toString(20)][i].name) || route.fietsroute.length > 20) {
                     // skip this element
+        // console.log("SKIP");
+                    routeLog += "SKIP LOOP<br>";
                     continue;
                 }
-                if (route.add("netwerken", netwerkenH[route.matchCoords.toString(20)][i], false) < 0) {
+                if (route.add("netwerken", netwerkenH[route.matchCoords.toString(20)][i], true) < 0) {
                     console.log("Unexpected error in createRouteTo");
                     continue;
                 }
                 // successfully added route element
+                // console.log("START wait");
+                // wait(100);
+                routeLog += "ADDED WITH maxdistance " + maxdistance.len + "<br>";
                 if (route.fietsroute.last().cumLength < maxdistance.len) {
+                    routeLog += "TO<br>" + getRoute(route) + "<br>";
                     let newlen = createRouteTo(route, maxdistance);
                     // wait(500);
                     // if (newlen >= 0)
                     //     return retval;
-                }
+                } else
+                    routeLog += "NOK TOO long<br>";
                 // route.deleteLast();
+                // routeLog += "DELETE " + netwerkenH[route.matchCoords.toString(20)][i].name + "<br>";
                 route.deleteLastWithLayer();
+                routeLog += "AFTER DELETE<br>" + getRoute(route);
             }
+        // console.log("+++++ END LOOP ________________________");
             return maxdistance.len;
         }
     }
 
-    // Add elements from array "routeFrom.fietsroute" starting at "fromIndex" to end of "routeTo.fietsroute"
-    function copyFietsroute(fromIndex, fromRoute, toRoute) {
-        for (let j = fromIndex; j < fromRoute.fietsroute.length; j++)
-            toRoute.add(fromRoute.fietsroute[j].type, fromRoute.fietsroute[j].element);
-    }
+            // // Add elements from array "routeFrom.fietsroute" starting at "fromIndex" to end of "routeTo.fietsroute"
+            // function copyFietsroute(fromIndex, fromRoute, toRoute) {
+            //     for (let j = fromIndex; j < fromRoute.fietsroute.length; j++)
+            //         toRoute.add(fromRoute.fietsroute[j].type, fromRoute.fietsroute[j].element);
+            // }
 
-    if (this.fietsroute.length == 0) {
-        // no previous route yet, just add the selected element
-        return this.add(type, knpOrNet, false);
-    }
-    // there is an existing route
     // route should not be longer then 5 * direct distance from existing route to knpOrNet
     var maxDist = {len: (this.fietsroute.length == 0
                          ? 10
@@ -448,7 +497,8 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                         )
                   }
 
-    tryRoute.copyLastElementFrom(this);
+    // tryRoute.copyLastElementFrom(this);
+    tryRoute.add(this.fietsroute.last().type, this.fietsroute.last().element);
 
     var length = createRouteTo(tryRoute, maxDist);
     if (length == 0 ) {
@@ -456,16 +506,20 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
         console.log("Route found");
         console.log("=====================================");
         // Match found, add elements to "this"
-        copyFietsroute(0, shortestRoute, this);
+            // copyFietsroute(0, shortestRoute, this);
+        shortestRoute.addFietsroute(0, this);
     } else if (length > 0) {
         // route found
         console.log("Route found");
         console.log("=====================================");
         // Match found, add elements to "this"
-        copyFietsroute(1, shortestRoute, this);
+            // copyFietsroute(1, shortestRoute, this);
+        shortestRoute.addFietsroute(1, this);
     } else {
         console.log("NO route  found");
     } 
+
+    showMessage(routeLog);
 
     return retval;
     
