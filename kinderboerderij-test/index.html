@@ -46,12 +46,19 @@
             <td></td>
         </tr>
     </table>
-    <button onclick="showCoords()">Show image coordinates</button>
+    <div>
+        <button onclick="showCoords()">Show image coordinates</button>
+    </div>
+    <div>
+        <button onclick="changeOpacity(0.1)">Opacity +</button>
+        <button onclick="changeOpacity(-0.1)">Opacity -</button>
+    </div>
     <div id="message-field"></div>
     <div id="mapid">Loading map...</div>
     <script>
         var bounds, image;
         var messageField = document.getElementById("message-field");
+        var opacityLevel = 0.5;
 
         var movedist = 0.0001;
         function resizeImage (leftLng, leftLat, rightLng, rightLat) { 
@@ -68,6 +75,12 @@
         function showCoords() {
             bounds = image.getBounds();
             messageField.innerText = "Top Left = " + bounds.getNorthWest() + " | Bottom Right = " + bounds.getSouthEast();;
+        }
+
+        function changeOpacity(o) {
+            if ( (o > 0  && opacityLevel < 1) || (o < 0 && opacityLevel > 0) )
+                opacityLevel += o;
+            image.setOpacity(opacityLevel);
         }
 
         var mymap = L.map('mapid').setView([52.032822, 4.696595], 18);
@@ -92,8 +105,9 @@
         baselayer.addTo(mymap);
 
         // bounds = [ [52.03411, 4.69473], [52.03127, 4.69756] ];
-        bounds = L.latLngBounds([52.03411, 4.6947], [52.03122, 4.69756] );
-        image = L.imageOverlay('Plattegrond getekend.jpg', bounds, {opacity: 0.5});
+        bounds = L.latLngBounds([52.03407, 4.69472], [52.03123, 4.69758] );
+        // image = L.imageOverlay('Plattegrond getekend.jpg', bounds, {opacity: 0.5});
+        image = L.imageOverlay('Kaart2.jpg', bounds, {opacity: opacityLevel});
         image.addTo(mymap);
     // console.log(image);
         // bounds = [ [52.03311, 4.69473], [52.03127, 4.69756] ];

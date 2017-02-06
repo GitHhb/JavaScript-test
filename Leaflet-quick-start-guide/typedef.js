@@ -419,7 +419,7 @@ FietsrouteType.prototype.addRouteUptoMarker = function (type, knpOrNet) {
                 // successfully added route element
                 if (route.fietsroute.last().cumLength < maxdistance.len) {
                     let newlen = createRouteTo(route, maxdistance);
-                    wait(500);
+                    // wait(500);
                     // if (newlen >= 0)
                     //     return retval;
                 }
