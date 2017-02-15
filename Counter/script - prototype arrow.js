@@ -1,4 +1,5 @@
-var Counter = function (screenObj, min = 10, sec = 0, speed = 1000) {
+var Counter = (function() {
+function Counter(screenObj, min = 10, sec = 0, speed = 1000) {
     // Init vars
     var selfx = this;
     this.timer;
@@ -52,9 +53,12 @@ Counter.prototype.reset = function () {
 };
 
 Counter.prototype.stop = function () {
-    clearInterval(this.timer);
-    this.timerSet = false;
+    let _this = this;
+    clearInterval(_this.timer);
+    _this.timerSet = false;
 }
+return Counter;
+}());
 
 
 // Init counter 1
@@ -65,7 +69,7 @@ var counter1But = document.getElementById("counter1-but");
 counter1But.addEventListener("click", counter1.reset.bind(counter1));
 // setup stop button
 var counter1StopBut = document.getElementById("counter1-stop-but");
-counter1StopBut.addEventListener("click", counter1.stop.bind(counter1));
+counter1StopBut.addEventListener("click", counter1.stop);
 // setup start button
 var counter1StartBut = document.getElementById("counter1-start-but");
 counter1StartBut.addEventListener("click", counter1.start.bind(counter1));
